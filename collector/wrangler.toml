@@ -1,0 +1,18 @@
+# xing.report collector — scheduled Cloudflare Worker
+# Fetches the CBP and CBSA border wait-time feeds every 5 minutes
+# and archives every reading in D1. Knows nothing about web pages.
+
+name = "xing-collector"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "xing-report"
+database_id = "7f5e4bde-de8d-43b2-8707-b752d05766d7"
+
+[observability]
+enabled = true
