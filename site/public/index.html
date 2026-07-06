@@ -3,81 +3,313 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>xing.report</title>
-<!-- PASS 1: correctness only. No styling yet — verifying the numbers
-     are right before making it look right. -->
+<meta name="color-scheme" content="light dark">
+<title>xing.report — detroit–windsor border waits</title>
+<style>
+/* ============ palette — DESIGN-SPEC §1 ============ */
+:root {
+  --paper: #F2F1ED;
+  --ink: #141414;
+  --hairline: #C9C7C2;
+  --muted: #6B6963;
+  --receded: #A5A29B;
+  --moving: #008A43;
+  --slow-fill: #F5A300;   --slow-text: #141414;
+  --backed-fill: #E8291C; --backed-text: #FFFFFF;
+  --accent: #0E71B8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #121212;
+    --ink: #EDEBE6;
+    --hairline: #3A3A38;
+    --muted: #99968F;
+    --receded: #6E6C66;
+    --moving: #3FD37F;
+    --slow-fill: #FFAF1F;   --slow-text: #121212;
+    --backed-fill: #FF6047; --backed-text: #121212;
+    --accent: #4BA3DC;
+  }
+}
+
+/* ============ base — §2, §3 ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 20px;
+  text-transform: lowercase; /* everything lowercase, no exceptions */
+}
+main { max-width: 480px; margin: 0 auto; padding: 16px; }
+
+/* ============ wordmark — §4 ============ */
+header {
+  border-bottom: 2px solid var(--ink);
+  padding: 16px;
+}
+.wordmark {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 20px; font-weight: 700;
+}
+.wordmark svg { display: block; }
+.wordmark .tld { font-weight: 400; color: var(--accent); } /* the accent — once, here, nowhere else */
+
+/* ============ stale warning strip — §5 ============ */
+#stale {
+  display: none;
+  background: var(--slow-fill); color: var(--slow-text);
+  font-weight: 700; padding: 16px;
+}
+#stale.show { display: block; }
+
+/* ============ direction toggle — §5, tap targets §3 ============ */
+.toggle {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 2px solid var(--ink);
+  margin-bottom: 16px;
+}
+.toggle button {
+  height: 56px;
+  font: 700 15px/16px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-transform: lowercase;
+  background: none; color: var(--ink);
+  border: none; cursor: pointer;
+}
+.toggle button:first-child { border-right: 2px solid var(--ink); }
+.toggle button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* ============ crossing card ============ */
+.card { border: 2px solid var(--ink); padding: 24px; margin-bottom: 16px; }
+.bridge { font-size: 28px; line-height: 32px; font-weight: 700; margin-bottom: 16px; }
+
+.lane-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; line-height: 16px; font-weight: 400;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.lane-label svg { color: var(--ink); }
+
+/* the hero numeral — nothing renders larger (§2, §5) */
+.hero-row { display: flex; align-items: baseline; gap: 16px; margin: 8px 0; flex-wrap: wrap; }
+.numeral {
+  font-size: 96px; line-height: 91px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap;
+}
+.unit { font-size: 16px; font-weight: 400; color: var(--muted); }
+
+/* signal field — always contains its word (§1) */
+.signal { font-size: 20px; padding: 8px 16px; }
+.s-moving { color: var(--moving); font-weight: 400; padding: 8px 0; } /* calm is quiet: no fill */
+.s-slow { background: var(--slow-fill); color: var(--slow-text); font-weight: 700; }
+.s-backed { background: var(--backed-fill); color: var(--backed-text); font-weight: 700; }
+.s-closed { background: var(--ink); color: var(--paper); font-weight: 700; }
+
+/* trend — one word, always (§5) */
+.trend { font-size: 15px; line-height: 16px; }
+.t-climbing { font-weight: 700; color: var(--ink); }
+.t-easing, .t-steady { font-weight: 400; color: var(--receded); }
+
+/* secondary lanes: car · nexus (§2 nexus numeral) */
+.minor { display: flex; gap: 24px; }
+.minor > div { flex: 1; }
+.minor .numeral { font-size: 40px; line-height: 40px; letter-spacing: 0; }
+.minor .hero-row { gap: 8px; }
+
+.rule { border: none; border-top: 1px solid var(--hairline); margin: 16px 0; }
+
+/* the two clocks — plain language, told apart by wording */
+.fresh { color: var(--muted); }
+
+footer {
+  max-width: 480px; margin: 0 auto; padding: 0 16px 24px;
+  font-size: 13px; line-height: 16px; color: var(--muted);
+}
+</style>
 </head>
 <body>
-<h1>xing.report — pass 1 (unstyled)</h1>
-<div id="app">loading…</div>
+
+<header>
+  <span class="wordmark">
+    <!-- ✕ mark: two crossed bars at ±45° (§4) -->
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <g fill="currentColor">
+        <rect x="1" y="8.5" width="22" height="7" transform="rotate(45 12 12)"/>
+        <rect x="1" y="8.5" width="22" height="7" transform="rotate(-45 12 12)"/>
+      </g>
+    </svg>
+    xing<span class="tld">.report</span>
+  </span>
+</header>
+
+<div id="stale"></div>
+
+<main>
+  <nav class="toggle" aria-label="direction">
+    <button id="btn-to_canada" aria-pressed="true">det → win</button>
+    <button id="btn-to_us" aria-pressed="false">win → det</button>
+  </nav>
+  <div id="cards"><div class="fresh">loading…</div></div>
+</main>
+
+<footer>
+  wait times: u.s. customs and border protection (into the u.s.) ·
+  canada border services agency (into canada). checked every 5 minutes.
+</footer>
 
 <script>
-// Status thresholds from DESIGN-SPEC.md §5, keyed to the truck wait:
-// < 20 min = moving · 20–59 = slow · ≥ 60 = backed up.
-function statusWord(waitMinutes) {
-  if (waitMinutes === null || waitMinutes === undefined) return null;
-  if (waitMinutes < 20) return 'moving';
-  if (waitMinutes < 60) return 'slow';
-  return 'backed up';
-}
+'use strict';
 
-// "updated X min ago", preferring the timestamp the AGENCY reported the
-// number at (feed_updated_at); our own fetch time is the fallback and is
-// labelled as such, per CLAUDE.md: never let old data pretend to be live.
-function freshness(reading) {
-  const t = reading.feed_updated_at || reading.fetched_at;
-  const label = reading.feed_updated_at ? 'updated' : 'fetched (feed gave no timestamp)';
-  const mins = Math.max(0, Math.round((Date.now() - new Date(t).getTime()) / 60000));
-  const stale = mins > 10 ? '  ⚠ MORE THAN 10 MIN OLD' : '';
-  return `${label} ${mins} min ago${stale}`;
-}
-
-const LANE_LABELS = {
-  'commercial/standard': 'truck',
-  'commercial/fast': 'truck (fast)',
-  'passenger/standard': 'car',
-  'passenger/nexus': 'nexus',
-  'passenger/ready': 'car (ready lane)',
+// ---- pictograms — §3: 48×30, 2.5 stroke, no fill, currentColor ----
+const PICTO = {
+  truck: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="6" width="26" height="15"/><path d="M28 11 h9 l7 7 v3 h-16 z"/><circle cx="11" cy="25" r="3"/><circle cx="37" cy="25" r="3"/></svg>',
+  car: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 22 v-4 l7 -2 5 -6 h11 l6 6 h9 v6"/><circle cx="14" cy="24" r="3"/><circle cx="35" cy="24" r="3"/></svg>',
+  nexus: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M24 3 L38 15 L24 27 L10 15 Z"/></svg>',
 };
 
-const DIRECTIONS = [
-  ['to_canada', 'detroit → windsor'],
-  ['to_us', 'windsor → detroit'],
-];
-
-async function render() {
-  const res = await fetch('/api/now');
-  const data = await res.json();
-  const bridge = data.crossings.find((c) => c.slug === 'ambassador-bridge');
-  if (!bridge) {
-    document.getElementById('app').textContent = 'no ambassador bridge data found';
-    return;
-  }
-
-  let html = `<h2>${bridge.name}</h2>`;
-  for (const [dir, dirLabel] of DIRECTIONS) {
-    const lanes = bridge.readings.filter((r) => r.direction === dir);
-    const truck = lanes.find((r) => r.lane_category === 'commercial' && r.lane_type === 'standard');
-    const dirStatus = truck ? statusWord(truck.wait_minutes) : null;
-
-    html += `<h3>${dirLabel}${dirStatus ? ` — ${dirStatus}` : ''}</h3><ul>`;
-    for (const r of lanes) {
-      const label = LANE_LABELS[`${r.lane_category}/${r.lane_type}`] || `${r.lane_category}/${r.lane_type}`;
-      const wait = r.wait_minutes === null
-        ? `no number — feed says "${r.status_text}"`
-        : `${r.wait_minutes} min`;
-      html += `<li><b>${label}</b>: ${wait}`
-        + (r.wait_minutes !== null ? ` — ${statusWord(r.wait_minutes)}` : '')
-        + ` <small>(${freshness(r)} · source: ${r.source})</small></li>`;
-    }
-    html += '</ul>';
-  }
-  document.getElementById('app').innerHTML = html;
+// ---- status thresholds — §5, keyed to the truck wait ----
+function statusOf(wait) {
+  if (wait === null || wait === undefined) return null;
+  if (wait < 20) return { word: 'moving', cls: 's-moving' };
+  if (wait < 60) return { word: 'slow', cls: 's-slow' };
+  return { word: 'backed up', cls: 's-backed' };
 }
 
-render().catch((e) => {
-  document.getElementById('app').textContent = 'failed to load data: ' + e.message;
+const TREND_MARK = { climbing: '▲', easing: '▼', steady: '—' };
+
+let data = null;
+let direction = 'to_canada'; // det → win
+
+function lane(readings, category, type) {
+  return readings.find((r) => r.direction === direction && r.lane_category === category && r.lane_type === type);
+}
+
+function minsAgo(iso) {
+  return Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+}
+
+// clock time as a driver would say it, in the corridor's timezone
+function clock(iso) {
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Detroit',
+  }).format(new Date(iso)).toLowerCase();
+}
+
+function trendHtml(r) {
+  if (!r || !r.trend) return '';
+  return `<div class="trend t-${r.trend}">${TREND_MARK[r.trend]} ${r.trend}</div>`;
+}
+
+function numeralHtml(r) {
+  if (r.wait_minutes === null) return `<span class="numeral">–</span>`;
+  return `<span class="numeral">${r.wait_minutes}</span><span class="unit">min</span>`;
+}
+
+function minorLaneHtml(r, picto, label) {
+  if (!r) return '';
+  return `<div>
+    <div class="lane-label">${PICTO[picto]}${label}</div>
+    <div class="hero-row">${numeralHtml(r)}</div>
+    ${trendHtml(r)}
+  </div>`;
+}
+
+// the two clocks, told apart in plain words:
+// one says how old the border's own reading is, the other says when WE last checked.
+function freshHtml(readings) {
+  const src = readings.find((r) => r.lane_category === 'commercial' && r.direction === direction)
+           || readings.find((r) => r.direction === direction);
+  if (!src) return '';
+  const lines = [];
+  if (src.feed_updated_at) {
+    lines.push(`the border reported this wait at ${clock(src.feed_updated_at)}`);
+  } else {
+    lines.push(`the border gave no time for this reading`);
+  }
+  const checked = minsAgo(src.fetched_at);
+  lines.push(`we checked for updates ${checked === 0 ? 'just now' : `${checked} min ago`}`);
+  return `<div class="fresh">${lines.join('<br>')}</div>`;
+}
+
+function cardHtml(crossing) {
+  const truck = lane(crossing.readings, 'commercial', 'standard');
+  const car = lane(crossing.readings, 'passenger', 'standard');
+  const nexus = lane(crossing.readings, 'passenger', 'nexus');
+  if (!truck && !car) return '';
+
+  let hero = '';
+  if (truck) {
+    const s = truck.wait_minutes === null
+      ? { word: (truck.status_text || 'closed'), cls: 's-closed' }
+      : statusOf(truck.wait_minutes);
+    hero = `
+      <div class="lane-label">${PICTO.truck}truck</div>
+      <div class="hero-row">
+        ${numeralHtml(truck)}
+        <span class="signal ${s.cls}">${s.word}</span>
+      </div>
+      ${trendHtml(truck)}
+      <hr class="rule">`;
+  }
+
+  const minors = [minorLaneHtml(car, 'car', 'car'), minorLaneHtml(nexus, 'nexus', 'nexus')]
+    .filter(Boolean).join('');
+
+  return `<section class="card">
+    <h2 class="bridge">${crossing.name}</h2>
+    ${hero}
+    ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
+    ${freshHtml(crossing.readings)}
+  </section>`;
+}
+
+function render() {
+  if (!data) return;
+
+  // phase 0: the ambassador bridge card. more crossings join this list in phase 1.
+  const show = ['ambassador-bridge'];
+  document.getElementById('cards').innerHTML = data.crossings
+    .filter((c) => show.includes(c.slug))
+    .map(cardHtml)
+    .join('') || '<div class="fresh">no data available</div>';
+
+  // warning strip fires on OUR pipeline falling behind (collector runs every
+  // 5 min), not on the agencies' own slower clocks — keeps the warning meaningful.
+  const newest = Math.min(
+    ...data.crossings.flatMap((c) => c.readings.map((r) => minsAgo(r.fetched_at)))
+  );
+  const strip = document.getElementById('stale');
+  if (newest > 10) {
+    strip.textContent = `warning — our last successful data check was ${newest} min ago. numbers may be out of date.`;
+    strip.className = 'show';
+  } else {
+    strip.className = '';
+  }
+
+  for (const dir of ['to_canada', 'to_us']) {
+    document.getElementById('btn-' + dir).setAttribute('aria-pressed', String(dir === direction));
+  }
+}
+
+for (const dir of ['to_canada', 'to_us']) {
+  document.getElementById('btn-' + dir).addEventListener('click', () => {
+    direction = dir;
+    render();
+  });
+}
+
+async function refresh() {
+  const res = await fetch('/api/now');
+  if (res.ok) data = await res.json();
+  render();
+}
+
+refresh().catch(() => {
+  document.getElementById('cards').innerHTML = '<div class="fresh">could not load data — try reloading</div>';
 });
+setInterval(() => refresh().catch(() => {}), 60000); // new numbers land every 5 min; check each minute
+setInterval(render, 30000); // keep "we checked x min ago" honest between fetches
 </script>
 </body>
 </html>
