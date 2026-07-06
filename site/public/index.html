@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>xing.report</title>
+<!-- PASS 1: correctness only. No styling yet — verifying the numbers
+     are right before making it look right. -->
+</head>
+<body>
+<h1>xing.report — pass 1 (unstyled)</h1>
+<div id="app">loading…</div>
+
+<script>
+// Status thresholds from DESIGN-SPEC.md §5, keyed to the truck wait:
+// < 20 min = moving · 20–59 = slow · ≥ 60 = backed up.
+function statusWord(waitMinutes) {
+  if (waitMinutes === null || waitMinutes === undefined) return null;
+  if (waitMinutes < 20) return 'moving';
+  if (waitMinutes < 60) return 'slow';
+  return 'backed up';
+}
+
+// "updated X min ago", preferring the timestamp the AGENCY reported the
+// number at (feed_updated_at); our own fetch time is the fallback and is
+// labelled as such, per CLAUDE.md: never let old data pretend to be live.
+function freshness(reading) {
+  const t = reading.feed_updated_at || reading.fetched_at;
+  const label = reading.feed_updated_at ? 'updated' : 'fetched (feed gave no timestamp)';
+  const mins = Math.max(0, Math.round((Date.now() - new Date(t).getTime()) / 60000));
+  const stale = mins > 10 ? '  ⚠ MORE THAN 10 MIN OLD' : '';
+  return `${label} ${mins} min ago${stale}`;
+}
+
+const LANE_LABELS = {
+  'commercial/standard': 'truck',
+  'commercial/fast': 'truck (fast)',
+  'passenger/standard': 'car',
+  'passenger/nexus': 'nexus',
+  'passenger/ready': 'car (ready lane)',
+};
+
+const DIRECTIONS = [
+  ['to_canada', 'detroit → windsor'],
+  ['to_us', 'windsor → detroit'],
+];
+
+async function render() {
+  const res = await fetch('/api/now');
+  const data = await res.json();
+  const bridge = data.crossings.find((c) => c.slug === 'ambassador-bridge');
+  if (!bridge) {
+    document.getElementById('app').textContent = 'no ambassador bridge data found';
+    return;
+  }
+
+  let html = `<h2>${bridge.name}</h2>`;
+  for (const [dir, dirLabel] of DIRECTIONS) {
+    const lanes = bridge.readings.filter((r) => r.direction === dir);
+    const truck = lanes.find((r) => r.lane_category === 'commercial' && r.lane_type === 'standard');
+    const dirStatus = truck ? statusWord(truck.wait_minutes) : null;
+
+    html += `<h3>${dirLabel}${dirStatus ? ` — ${dirStatus}` : ''}</h3><ul>`;
+    for (const r of lanes) {
+      const label = LANE_LABELS[`${r.lane_category}/${r.lane_type}`] || `${r.lane_category}/${r.lane_type}`;
+      const wait = r.wait_minutes === null
+        ? `no number — feed says "${r.status_text}"`
+        : `${r.wait_minutes} min`;
+      html += `<li><b>${label}</b>: ${wait}`
+        + (r.wait_minutes !== null ? ` — ${statusWord(r.wait_minutes)}` : '')
+        + ` <small>(${freshness(r)} · source: ${r.source})</small></li>`;
+    }
+    html += '</ul>';
+  }
+  document.getElementById('app').innerHTML = html;
+}
+
+render().catch((e) => {
+  document.getElementById('app').textContent = 'failed to load data: ' + e.message;
+});
+</script>
+</body>
+</html>
