@@ -261,6 +261,28 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
 .src-row svg { flex: none; }
 .src-row .what { color: var(--muted); }
 .src-close { margin-top: 12px; font-size: 13px; line-height: 16px; color: var(--muted); }
+
+/* ============ "best time to cross" chart — §6 ============
+   bars in ink only (signal colors never fill data), 2px ink baseline,
+   sparse hour ticks, two word-paired callouts. lives behind a tap so the
+   glance screen stays calm; only drawn once the archive is deep enough. */
+.chart { padding-top: 8px; }
+.chart-bars {
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 96px; border-bottom: 2px solid var(--ink);
+}
+.chart-bars > div { flex: 1; background: var(--ink); min-height: 2px; }
+.chart-bars > div.empty { background: none; } /* an hour with no history reads as a gap, not a zero */
+.chart-ticks {
+  display: flex; justify-content: space-between;
+  font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px;
+}
+.chart-callout { font-size: 15px; line-height: 20px; margin-top: 8px; }
+.chart-callout .quiet { color: var(--moving); }    /* quiet-green, always with its word */
+.chart-callout .busy { font-weight: 700; }
+.chart-basis { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
+/* the honest pre-chart state — one calm muted line, no fold */
+.chart-gathering { color: var(--muted); margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -376,6 +398,7 @@ const SHORT_NAME = { 'ambassador-bridge': 'ambassador', 'detroit-windsor-tunnel'
 const TUNNEL_TRUCK_CAVEAT = 'small trucks only — under 12′8″ tall';
 
 let data = null;
+let patterns = null; // "best time to cross" history, fetched separately from the live numbers
 
 // direction + vehicle survive reloads: pick once, keep it on the dashboard
 function remember(key, value) { try { localStorage.setItem(key, value); } catch {} }
@@ -652,6 +675,57 @@ function boardHtml() {
   return rows ? `<div class="board">${rows}</div>` : '<div class="fresh">no data available</div>';
 }
 
+/* ============ "best time to cross" — the tool only our archive can build ==== */
+
+// clock hour as a person says it: 0→12am, 5→5am, 12→12pm, 17→5pm
+function hourLabel(h) {
+  const period = h < 12 ? 'am' : 'pm';
+  const twelve = h % 12 === 0 ? 12 : h % 12;
+  return `${twelve}${period}`;
+}
+
+// the chart for the currently chosen crossing + direction + vehicle. three
+// states, all honest: not enough history yet, no history for this lane, or
+// the drawn pattern. never a confident chart from thin data.
+function bestTimesHtml(slug) {
+  if (!patterns || !patterns.history) return ''; // absent or unexpected shape: never let it break a card
+  if (!patterns.ready) {
+    const d = patterns.history.days;
+    const left = Math.max(1, patterns.min_days - d);
+    return `<hr class="rule">
+      <div class="chart-gathering">best times to cross — gathering data. a full week builds a reliable pattern; about ${left} ${left === 1 ? 'day' : 'days'} to go.</div>`;
+  }
+  const series = ((patterns.crossings[slug] || {})[direction] || {})[mode];
+  const withData = (series || []).filter((p) => p.wait !== null && p.n > 0);
+  if (!withData.length) return ''; // this lane has no usable history — say nothing rather than draw nothing
+
+  const max = Math.max(...withData.map((p) => p.wait));
+  const bars = series.map((p) => {
+    if (p.wait === null || p.n === 0) return `<div class="empty"></div>`;
+    const pct = max > 0 ? Math.round((p.wait / max) * 100) : 2;
+    return `<div style="height:${Math.max(pct, 2)}%"></div>`;
+  }).join('');
+
+  // callouts pair color with words, always. quietest in quiet-green, busiest in ink 700.
+  const quiet = withData.reduce((a, b) => (b.wait < a.wait ? b : a));
+  const busy = withData.reduce((a, b) => (b.wait > a.wait ? b : a));
+  const mins = (w) => (w === 0 ? 'no wait' : `${w} min`);
+  const callout = max === 0
+    ? `<div class="chart-callout"><span class="quiet">usually no wait, any hour</span></div>`
+    : `<div class="chart-callout"><span class="quiet">quietest around ${hourLabel(quiet.hour)} — ${mins(quiet.wait)}</span></div>
+       <div class="chart-callout"><span class="busy">busiest around ${hourLabel(busy.hour)} — ${mins(busy.wait)}</span></div>`;
+
+  return `<details class="more" data-slug="${slug}-best">
+    <summary>best times to cross</summary>
+    <div class="chart">
+      <div class="chart-bars">${bars}</div>
+      <div class="chart-ticks"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span></div>
+      ${callout}
+      <div class="chart-basis">typical ${mode} wait by hour · ${patterns.history.days} days of history</div>
+    </div>
+  </details>`;
+}
+
 /* ============ detail cards — for when you're parked ============ */
 
 function cardHtml(crossing) {
@@ -696,6 +770,7 @@ function cardHtml(crossing) {
     ${hero}
     ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
     ${freshHtml(crossing.readings, heroKey === 'car' ? 'passenger' : 'commercial')}
+    ${bestTimesHtml(crossing.slug)}
     ${factsHtml(crossing.info, crossing.slug)}
   </section>`;
 }
@@ -861,10 +936,20 @@ async function refresh() {
   render();
 }
 
+// history changes slowly — fetch it once, keep it; a failure just leaves the
+// charts absent, never breaks the live numbers.
+async function loadPatterns() {
+  const res = await fetch('/api/patterns');
+  if (res.ok) patterns = await res.json();
+  render();
+}
+
 refresh().catch(() => {
   document.getElementById('board').innerHTML = '<div class="fresh">we couldn\'t load the numbers — try reloading</div>';
 });
+loadPatterns().catch(() => {});
 setInterval(() => refresh().catch(() => {}), 60000); // new numbers land every 5 min; check each minute
+setInterval(() => loadPatterns().catch(() => {}), 3600000); // history barely moves; re-pull hourly
 setInterval(render, 30000); // keep "we checked x min ago" honest between fetches
 </script>
 </body>

@@ -8,6 +8,7 @@ Design language: Otl Aicher / Ulm / Munich 1972 wayfinding. Signage, not a websi
 Date: 07 jul 2026 · v1.2 adds: three crossings, "fastest right now" summary, traveler-first hierarchy, friendly copy register, best-time-to-cross chart.
 v1.3 adds (approved on preview, jul 2026): the one-glance layout — verdict line, truck/car toggle, comparison board, folded rows — plus the sources footer and national-flag pictograms, the single sanctioned color exception.
 v1.4 (v2 step 2): the copy register warms for everyday crossers — "to windsor / to detroit" toggle, plain-language lane names, gentler fallback wording, "safe travels." footer close — and the per-vehicle status thresholds are wired to the lane kind.
+v1.5 (v2 step 3): "best time to cross" hourly charts from the archive, behind a per-card tap, with an honesty gate (≥7 days of history before any chart is drawn). See §6.
 
 ---
 
@@ -130,7 +131,9 @@ Shared rules — bars in ink only (signal colors never fill data), one reference
 
 **"corridor by the numbers"** (monthly volume): 12 bars, gap 8px (1u), single-letter months. One callout row max (e.g. "peak · april 2026 — 251k"), 15px, value 700 tabular.
 
-**"best time to cross"** (hourly wait): 24 bars, gap 4px, sparse hour ticks (12a · 6a · 12p · 6p · 11p). Two callout rows: quietest window in quiet-green text (`#008A43` day / `#3FD37F` night, 400) and busiest window in ink 700 — color always paired with words.
+**"best time to cross"** (hourly wait): 24 bars, gap 4px, sparse hour ticks (12a · 6a · 12p · 6p · 11p). Two callout rows: quietest window in quiet-green text (`#008A43` day / `#3FD37F` night, 400) and busiest window in ink 700 — color always paired with words. Follows the direction + vehicle toggles; lives behind a "best times to cross" tap so the glance screen stays calm.
+
+**Honesty gate (v1.5):** the chart is only drawn once the archive holds at least 7 days of history (built from a 90-day lookback of the readings table, bucketed to local hour). Below that, the card shows one calm muted line — "gathering data … about N days to go" — never a confident-looking chart from thin data. An hour with no history renders as a gap, not a zero. Served by the read-only `/api/patterns` endpoint, cached an hour.
 
 ---
 
