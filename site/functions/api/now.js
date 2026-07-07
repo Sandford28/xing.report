@@ -4,6 +4,7 @@
 // This is the website's door into the database. It reads; it never writes.
 
 import { CROSSING_INFO } from '../_lib/crossing-info.js';
+import { CAMERAS } from '../_lib/cameras.js';
 
 export async function onRequest({ env }) {
   const now = Date.now();
@@ -89,6 +90,7 @@ export async function onRequest({ env }) {
       slug: c.slug,
       name: c.name,
       info: CROSSING_INFO[c.slug] ?? null,
+      cameras: CAMERAS[c.slug] ?? null,
       readings: latest
         .filter((r) => r.crossing_id === c.id)
         .map(({ crossing_id, ...rest }) => ({

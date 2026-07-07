@@ -9,6 +9,7 @@ Date: 07 jul 2026 · v1.2 adds: three crossings, "fastest right now" summary, tr
 v1.3 adds (approved on preview, jul 2026): the one-glance layout — verdict line, truck/car toggle, comparison board, folded rows — plus the sources footer and national-flag pictograms, the single sanctioned color exception.
 v1.4 (v2 step 2): the copy register warms for everyday crossers — "to windsor / to detroit" toggle, plain-language lane names, gentler fallback wording, "safe travels." footer close — and the per-vehicle status thresholds are wired to the lane kind.
 v1.5 (v2 step 3): "best time to cross" hourly charts from the archive, behind a per-card tap, with an honesty gate (≥7 days of history before any chart is drawn). See §6.
+v1.6 (v2 step 4): approach cameras — one curated live still per crossing, behind a "see the approach camera" tap, following the direction toggle. See §5 and the §7 exception.
 
 ---
 
@@ -120,6 +121,7 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 - **Freshness:** "updated n min ago" is mandatory on every live view; stale > 10 min shows a warning strip.
 - **Alert strip:** one line per card. With an incident: ink field, paper text, 700. Without: "no incidents" unfilled in receded color, 400.
 - **Toggles:** two side-by-side — direction ("to windsor" / "to detroit") and vehicle ("truck" / "car"). Cells 56px tall; active cell is inverted (ink fill, paper text). Together they drive the verdict, the board, and every card; both choices persist across reloads. The chosen vehicle leads every card, so the eye finds the same thing in the same place.
+- **Approach camera:** one curated live still per crossing, behind a "see the approach camera" tap (calm-first, like the chart). It follows the direction toggle — heading into Canada you queue on the U.S. side, so that side shows, and vice versa. The image is loaded straight from the publishing agency (never stored or re-hosted), captioned with its location and source ("i-75 at the bridge approach · detroit · mdot mi drive"), and both agencies (mdot mi drive, ontario 511) are named in the sources footer. A down camera shows a calm "camera temporarily unavailable" line — never a broken-image icon. Curated + verified by hand in `cameras.js`, one camera per side per crossing; never scraped, never a wall of pins.
 - **Copy register (traveler warmth):** "checked 2 min ago" over "updated", "min by car" over bare units, "safe travels · data from cbsa + cbp lane sensors" as the footer. Warmth is words only — geometry, color, and edges never soften.
 - **Night mode:** same geometry, swapped palette per §1.
 
@@ -140,3 +142,5 @@ Shared rules — bars in ink only (signal colors never fill data), one reference
 ## 7 · Forbidden
 
 Gradients, drop shadows, glassmorphism, rounded corners, emoji, stock illustration, hero images, decorative anything. If it looks like a template or a startup landing page, it is wrong.
+
+The one image exception: a live approach camera (§5) is data, not decoration — it is allowed, but only credited, only behind a tap, and only one per crossing. No other photography.

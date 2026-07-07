@@ -283,6 +283,19 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
 .chart-basis { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
 /* the honest pre-chart state — one calm muted line, no fold */
 .chart-gathering { color: var(--muted); margin-top: 16px; }
+
+/* ============ approach camera — behind a tap, like the chart ============
+   a photo is the busiest thing on a calm page, so it only appears when asked
+   for. one image, for the direction you chose, loaded straight from the
+   agency (we never store it). a down camera says so — never a broken image. */
+.cam { padding-top: 8px; }
+.cam-frame {
+  border: 1px solid var(--hairline); background: var(--hairline);
+  min-height: 120px; display: flex; align-items: center; justify-content: center;
+}
+.cam-img { display: block; width: 100%; height: auto; }
+.cam-down { color: var(--muted); font-size: 15px; padding: 24px 16px; text-align: center; }
+.cam-cap { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -347,8 +360,8 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
   <div class="src-label">sources</div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>u.s. customs and border protection <span class="what">— wait times into the u.s.</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>canada border services agency <span class="what">— wait times into canada</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>mdot mi drive <span class="what">— michigan road alerts</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>ontario 511 <span class="what">— ontario road alerts</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>mdot mi drive <span class="what">— michigan road alerts &amp; cameras</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>ontario 511 <span class="what">— ontario road alerts &amp; cameras</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>u.s. national weather service <span class="what">— weather alerts</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>environment and climate change canada <span class="what">— weather alerts</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>bank of canada <span class="what">— daily exchange rate</span></div>
@@ -726,6 +739,28 @@ function bestTimesHtml(slug) {
   </details>`;
 }
 
+/* ============ approach camera — the live view of your line ============ */
+
+// the camera for the direction you chose: heading into Canada, you queue on
+// the U.S. side, so we show that side (and vice versa). one image, credited,
+// loaded straight from the agency. lives behind a tap so the glance screen
+// stays calm. a temporarily-down camera is caught in bindCameras().
+function cameraHtml(crossing) {
+  const cam = crossing.cameras && crossing.cameras[direction];
+  if (!cam) return '';
+  return `<details class="more" data-slug="${crossing.slug}-cam">
+    <summary>see the approach camera</summary>
+    <div class="cam">
+      <div class="cam-frame">
+        <img class="cam-img" loading="lazy" src="${cam.image}"
+             alt="live approach camera — ${cam.where}">
+        <div class="cam-down" hidden>camera temporarily unavailable</div>
+      </div>
+      <div class="cam-cap">${cam.where} · ${cam.network}</div>
+    </div>
+  </details>`;
+}
+
 /* ============ detail cards — for when you're parked ============ */
 
 function cardHtml(crossing) {
@@ -770,6 +805,7 @@ function cardHtml(crossing) {
     ${hero}
     ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
     ${freshHtml(crossing.readings, heroKey === 'car' ? 'passenger' : 'commercial')}
+    ${cameraHtml(crossing)}
     ${bestTimesHtml(crossing.slug)}
     ${factsHtml(crossing.info, crossing.slug)}
   </section>`;
@@ -868,6 +904,19 @@ function bindSignup() {
   });
 }
 
+// a camera can be down for maintenance or briefly unreachable — show a calm
+// line instead of a broken-image icon. re-bound each render (cards rebuild).
+function bindCameras() {
+  for (const img of document.querySelectorAll('.cam-img')) {
+    const down = img.parentElement.querySelector('.cam-down');
+    const fail = () => { img.hidden = true; if (down) down.hidden = false; };
+    const ok = () => { img.hidden = false; if (down) down.hidden = true; };
+    if (img.complete && img.naturalWidth === 0) fail(); // already failed before we bound
+    img.addEventListener('error', fail);
+    img.addEventListener('load', ok);
+  }
+}
+
 function render() {
   if (!data) return;
 
@@ -886,6 +935,7 @@ function render() {
     .join('');
   cardsEl.innerHTML = (detailCards || '<div class="fresh">no data available</div>') + blueWaterFoldHtml();
   for (const d of cardsEl.querySelectorAll('details')) d.open = openMore.has(d.dataset.slug);
+  bindCameras();
 
   // warning strip fires on OUR pipeline falling behind (collector runs every
   // 5 min), not on the agencies' own slower clocks — keeps the warning meaningful.
