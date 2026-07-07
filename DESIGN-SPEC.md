@@ -6,6 +6,7 @@ Audience: everyday travelers plus truck drivers and dispatchers — phone in a c
 Design language: Otl Aicher / Ulm / Munich 1972 wayfinding. Signage, not a website. Warmth comes from copy, never decoration.
 
 Date: 07 jul 2026 · v1.2 adds: three crossings, "fastest right now" summary, traveler-first hierarchy, friendly copy register, best-time-to-cross chart.
+v1.3 adds (approved on preview, jul 2026): the one-glance layout — verdict line, truck/car toggle, comparison board, folded rows — plus the sources footer and national-flag pictograms, the single sanctioned color exception.
 
 ---
 
@@ -50,6 +51,17 @@ Rules:
 | brand accent | `#0E71B8` | `#4BA3DC` |
 
 Appears once per screen, in the wordmark (`.report`). Never in UI states, never on data.
+
+### National flags — the one sanctioned exception (Mark, jul 2026)
+
+The US and Canada flags render as small pictograms in their **real colors** — the only break from "color means status only." Nothing else on the page may use color for identity or decoration.
+
+| flag | colors |
+|---|---|
+| us | stripes `#B22234` · canton `#3C3B6E` · white field |
+| canada | bars + maple leaf `#D52B1E` · white field |
+
+Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply on paper in both light and dark mode. Defined once in SVG `<defs>` (`#flag-us` / `#flag-ca`). They appear in exactly two places: the sources footer (one per agency row) and after the destination in the verdict line.
 
 ---
 
@@ -97,14 +109,15 @@ Appears once per screen, in the wordmark (`.report`). Never in UI states, never 
 ## 5 · Behavior rules
 
 - **Status thresholds** — trucker view (by truck wait): < 20 min = moving · 20–59 = slow · ≥ 60 = backed up. Traveler view (by car wait): < 15 = moving · 15–44 = slow · ≥ 45 = backed up.
-- **Summary strip:** "fastest right now" sits above everything — label 13px, crossing name + car minutes 28px 700. It answers the whole question for people who won't read further. Recomputes with the direction toggle.
-- **Crossings:** ambassador, detroit–windsor tunnel (cars only — sub-line reads "cars only" where truck wait would be), blue water bridge.
+- **The verdict:** one line above everything, 28px 700, that names the winner for the chosen direction and vehicle — "take the tunnel to windsor — 5 min vs 12 min for cars" — with the destination wearing its country's flag. It answers the whole question for people who won't read further. Recomputes with both toggles. Never crowned on a closed lane or data older than 10 min.
+- **Comparison board:** one bordered signboard under the toggles — ambassador and tunnel, fastest first, a "fastest" tag on a strict winner only (no tag on a tie). 72px numerals. Blue water (a 60-mile diversion) and gordie howe (not open yet) fold to single tap-to-expand rows below the detail cards; an active incident shows through the fold.
+- **Crossings:** ambassador, detroit–windsor tunnel, blue water bridge. The tunnel is a passenger crossing first — the car wait leads its card — but it does take small trucks (under 12′8″ tall, operator faq); wherever a trucker might act on a tunnel number, the caveat "small trucks only — under 12′8″ tall" appears with it.
 - **Hierarchy (traveler view):** car wait is the hero numeral; truck + nexus waits move to a 15px sub-line.
 - **Trend:** every lane always shows exactly one word next to its wait — ▲ climbing · ▼ easing · — steady — based on the last 15–30 min. Never a number, never blank. Climbing is ink-dark 700; easing and steady recede.
 - **Hierarchy:** nothing on a card renders larger than the wait numeral.
 - **Freshness:** "updated n min ago" is mandatory on every live view; stale > 10 min shows a warning strip.
 - **Alert strip:** one line per card. With an incident: ink field, paper text, 700. Without: "no incidents" unfilled in receded color, 400.
-- **Direction toggle:** two cells; traveler copy "to windsor" / "to detroit" (trucker view: "det → win" / "win → det"). Active cell is inverted (ink fill, paper text). One toggle drives all cards and the summary strip.
+- **Toggles:** two side-by-side — direction ("det → win" / "win → det") and vehicle ("truck" / "car"). Cells 56px tall; active cell is inverted (ink fill, paper text). Together they drive the verdict, the board, and every card; both choices persist across reloads. The chosen vehicle leads every card, so the eye finds the same thing in the same place.
 - **Copy register (traveler warmth):** "checked 2 min ago" over "updated", "min by car" over bare units, "safe travels · data from cbsa + cbp lane sensors" as the footer. Warmth is words only — geometry, color, and edges never soften.
 - **Night mode:** same geometry, swapped palette per §1.
 
