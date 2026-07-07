@@ -748,11 +748,14 @@ function bestTimesHtml(slug) {
 function cameraHtml(crossing) {
   const cam = crossing.cameras && crossing.cameras[direction];
   if (!cam) return '';
+  // src is set only when the fold opens (bindCameras) — deferred so we don't
+  // pull images a driver never looks at, and reliable in a way loading="lazy"
+  // is not for content revealed inside a <details>.
   return `<details class="more" data-slug="${crossing.slug}-cam">
     <summary>see the approach camera</summary>
     <div class="cam">
       <div class="cam-frame">
-        <img class="cam-img" loading="lazy" src="${cam.image}"
+        <img class="cam-img" data-src="${cam.image}"
              alt="live approach camera — ${cam.where}">
         <div class="cam-down" hidden>camera temporarily unavailable</div>
       </div>
@@ -904,16 +907,21 @@ function bindSignup() {
   });
 }
 
-// a camera can be down for maintenance or briefly unreachable — show a calm
-// line instead of a broken-image icon. re-bound each render (cards rebuild).
+// each camera loads its image only when its fold is open (deferred fetch),
+// and shows a calm line instead of a broken-image icon if it's down. re-bound
+// each render because the cards are rebuilt from scratch.
 function bindCameras() {
   for (const img of document.querySelectorAll('.cam-img')) {
+    const details = img.closest('details');
     const down = img.parentElement.querySelector('.cam-down');
     const fail = () => { img.hidden = true; if (down) down.hidden = false; };
     const ok = () => { img.hidden = false; if (down) down.hidden = true; };
-    if (img.complete && img.naturalWidth === 0) fail(); // already failed before we bound
     img.addEventListener('error', fail);
     img.addEventListener('load', ok);
+    // load on open; the browser's own cache keeps the frame fresh (511 ~20s).
+    const load = () => { if (!img.getAttribute('src')) img.src = img.dataset.src; };
+    if (details && details.open) load();
+    if (details) details.addEventListener('toggle', () => { if (details.open) load(); });
   }
 }
 
