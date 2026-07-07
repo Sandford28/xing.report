@@ -7,6 +7,7 @@ Design language: Otl Aicher / Ulm / Munich 1972 wayfinding. Signage, not a websi
 
 Date: 07 jul 2026 · v1.2 adds: three crossings, "fastest right now" summary, traveler-first hierarchy, friendly copy register, best-time-to-cross chart.
 v1.3 adds (approved on preview, jul 2026): the one-glance layout — verdict line, truck/car toggle, comparison board, folded rows — plus the sources footer and national-flag pictograms, the single sanctioned color exception.
+v1.4 (v2 step 2): the copy register warms for everyday crossers — "to windsor / to detroit" toggle, plain-language lane names, gentler fallback wording, "safe travels." footer close — and the per-vehicle status thresholds are wired to the lane kind.
 
 ---
 
@@ -108,7 +109,7 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 
 ## 5 · Behavior rules
 
-- **Status thresholds** — trucker view (by truck wait): < 20 min = moving · 20–59 = slow · ≥ 60 = backed up. Traveler view (by car wait): < 15 = moving · 15–44 = slow · ≥ 45 = backed up.
+- **Status thresholds** — judged per lane kind, because a routine truck wait is a miserable car wait. Truck lanes: < 20 min = moving · 20–59 = slow · ≥ 60 = backed up. Car and nexus lanes: < 15 = moving · 15–44 = slow · ≥ 45 = backed up.
 - **The verdict:** one line above everything, 28px 700, that names the winner for the chosen direction and vehicle — "take the tunnel to windsor — 5 min vs 12 min for cars" — with the destination wearing its country's flag. It answers the whole question for people who won't read further. Recomputes with both toggles. Never crowned on a closed lane or data older than 10 min.
 - **Comparison board:** one bordered signboard under the toggles — ambassador and tunnel, fastest first, a "fastest" tag on a strict winner only (no tag on a tie). 72px numerals. Blue water (a 60-mile diversion) and gordie howe (not open yet) fold to single tap-to-expand rows below the detail cards; an active incident shows through the fold.
 - **Crossings:** ambassador, detroit–windsor tunnel, blue water bridge. The tunnel is a passenger crossing first — the car wait leads its card — but it does take small trucks (under 12′8″ tall, operator faq); wherever a trucker might act on a tunnel number, the caveat "small trucks only — under 12′8″ tall" appears with it.
@@ -117,7 +118,7 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 - **Hierarchy:** nothing on a card renders larger than the wait numeral.
 - **Freshness:** "updated n min ago" is mandatory on every live view; stale > 10 min shows a warning strip.
 - **Alert strip:** one line per card. With an incident: ink field, paper text, 700. Without: "no incidents" unfilled in receded color, 400.
-- **Toggles:** two side-by-side — direction ("det → win" / "win → det") and vehicle ("truck" / "car"). Cells 56px tall; active cell is inverted (ink fill, paper text). Together they drive the verdict, the board, and every card; both choices persist across reloads. The chosen vehicle leads every card, so the eye finds the same thing in the same place.
+- **Toggles:** two side-by-side — direction ("to windsor" / "to detroit") and vehicle ("truck" / "car"). Cells 56px tall; active cell is inverted (ink fill, paper text). Together they drive the verdict, the board, and every card; both choices persist across reloads. The chosen vehicle leads every card, so the eye finds the same thing in the same place.
 - **Copy register (traveler warmth):** "checked 2 min ago" over "updated", "min by car" over bare units, "safe travels · data from cbsa + cbp lane sensors" as the footer. Warmth is words only — geometry, color, and edges never soften.
 - **Night mode:** same geometry, swapped palette per §1.
 

@@ -260,6 +260,7 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
 }
 .src-row svg { flex: none; }
 .src-row .what { color: var(--muted); }
+.src-close { margin-top: 12px; font-size: 13px; line-height: 16px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -283,8 +284,8 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
   <div id="verdict"></div>
   <div class="toggles">
     <nav class="toggle" aria-label="direction">
-      <button id="btn-to_canada" aria-pressed="true">det → win</button>
-      <button id="btn-to_us" aria-pressed="false">win → det</button>
+      <button id="btn-to_canada" aria-pressed="true">to windsor</button>
+      <button id="btn-to_us" aria-pressed="false">to detroit</button>
     </nav>
     <nav class="toggle" aria-label="vehicle">
       <button id="btn-truck" aria-pressed="true">truck</button>
@@ -329,6 +330,7 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>u.s. national weather service <span class="what">— weather alerts</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>environment and climate change canada <span class="what">— weather alerts</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>bank of canada <span class="what">— daily exchange rate</span></div>
+  <div class="src-close">safe travels.</div>
 </footer>
 
 <script>
@@ -341,20 +343,30 @@ const PICTO = {
   nexus: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M24 3 L38 15 L24 27 L10 15 Z"/></svg>',
 };
 
-// ---- status thresholds — §5, keyed to the truck wait ----
-function statusOf(wait) {
+// ---- status thresholds — §5: a 30-minute wait is routine for a truck
+// and miserable for a car, so each lane kind judges its own number ----
+const THRESHOLDS = {
+  truck: { slow: 20, backed: 60 },
+  car: { slow: 15, backed: 45 },
+};
+
+function statusOf(wait, kind) {
   if (wait === null || wait === undefined) return null;
-  if (wait < 20) return { word: 'moving', cls: 's-moving' };
-  if (wait < 60) return { word: 'slow', cls: 's-slow' };
+  const t = THRESHOLDS[kind] || THRESHOLDS.truck;
+  if (wait < t.slow) return { word: 'moving', cls: 's-moving' };
+  if (wait < t.backed) return { word: 'slow', cls: 's-slow' };
   return { word: 'backed up', cls: 's-backed' };
 }
 
 function signalOf(r) {
   if (r.wait_minutes === null) return { word: (r.status_text || 'closed'), cls: 's-closed' };
-  return statusOf(r.wait_minutes);
+  return statusOf(r.wait_minutes, r.lane_category === 'commercial' ? 'truck' : 'car');
 }
 
 const TREND_MARK = { climbing: '▲', easing: '▼', steady: '—' };
+
+// lane names in plain language — "nexus" means nothing to a first-timer
+const LANE_LABEL = { truck: 'truck', car: 'car', nexus: 'nexus (trusted traveler)' };
 
 // the two crossings a detroit–windsor driver actually chooses between
 const COMPARE_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
@@ -448,7 +460,7 @@ function alertsCurrent() {
 function alertStripHtml(crossing) {
   // never claim "no incidents" unless our alert collection is actually current
   if (!alertsCurrent()) {
-    return `<div class="alert-none">incident reports unavailable</div>`;
+    return `<div class="alert-none">we can't check road incidents right now</div>`;
   }
   const alerts = crossing.alerts || [];
   if (!alerts.length) return `<div class="alert-none">no incidents</div>`;
@@ -600,7 +612,7 @@ function boardRowHtml(crossing, fastestSlug) {
   if (!r) {
     return `<div class="board-row">
       <div class="board-name">${name}</div>
-      <div class="fresh">no ${mode} lane reported</div>
+      <div class="fresh">no live ${mode} wait reported here</div>
     </div>`;
   }
   const s = signalOf(r);
@@ -672,7 +684,7 @@ function cardHtml(crossing) {
   }
 
   const minorKeys = heroKey === 'car' ? ['nexus', 'truck'] : ['car', 'nexus'];
-  const minors = minorKeys.map((k) => minorLaneHtml(lanes[k], k, k)).filter(Boolean).join('');
+  const minors = minorKeys.map((k) => minorLaneHtml(lanes[k], k, LANE_LABEL[k])).filter(Boolean).join('');
 
   const place = crossing.info && crossing.info.place
     ? `<div class="place">${crossing.info.place}</div>` : '';
@@ -713,7 +725,7 @@ function blueWaterFoldHtml() {
       <span class="fold-title">
         <span class="fold-name">blue water bridge</span>
         <span>${summaryLine}</span>
-        <span class="fold-info">60 mi north</span>
+        <span class="fold-info">60 miles north, at port huron</span>
       </span>
     </summary>
     ${alertHtml}
@@ -850,7 +862,7 @@ async function refresh() {
 }
 
 refresh().catch(() => {
-  document.getElementById('board').innerHTML = '<div class="fresh">could not load data — try reloading</div>';
+  document.getElementById('board').innerHTML = '<div class="fresh">we couldn\'t load the numbers — try reloading</div>';
 });
 setInterval(() => refresh().catch(() => {}), 60000); // new numbers land every 5 min; check each minute
 setInterval(render, 30000); // keep "we checked x min ago" honest between fetches
