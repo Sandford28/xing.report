@@ -327,15 +327,21 @@ function shortDate(iso) {
     .format(new Date(iso + 'T00:00:00Z')).toLowerCase();
 }
 
-// tolls as posted by the operator; a missing currency is converted at the
-// bank of canada rate and marked "≈" so posted and computed never blur.
+// tolls: the operator's real posted prices wherever they exist; a currency
+// the operator doesn't post is calculated at the bank of canada rate and
+// marked "≈" as our estimate. returns [html, usedEstimate].
 function tollLine(row) {
   const parts = [];
+  let estimated = false;
   if (row.usd !== null && row.usd !== undefined) parts.push(`${money(row.usd)} usd`);
   if (row.cad !== null && row.cad !== undefined) parts.push(`${money(row.cad)} cad`);
-  else if (row.usd !== null && data.usd_cad) parts.push(`≈${money(row.usd * data.usd_cad.rate)} cad`);
+  else if (row.usd !== null && data.usd_cad) {
+    parts.push(`≈${money(row.usd * data.usd_cad.rate)} cad`);
+    estimated = true;
+  }
   const note = row.note ? ` (${row.note})` : '';
-  return `${row.label} — ${parts.join(' · ')}${note}`;
+  const asOf = row.as_of ? ` <span class="as-of">· posted ${shortDate(row.as_of)}</span>` : '';
+  return [`${row.label} — ${parts.join(' · ')}${note}${asOf}`, estimated];
 }
 
 // hazmat is safety information: verified-with-date or explicitly unverified,
@@ -351,9 +357,16 @@ function factsHtml(info) {
   if (!info) return '';
   let rows = '';
   if (info.tolls) {
-    rows += `<div class="label">tolls · as posted ${shortDate(info.tolls.as_of)}</div>`;
-    rows += info.tolls.rows.map((r) => `<div>${tollLine(r)}</div>`).join('');
-    if (data.usd_cad) rows += `<div class="as-of">≈ at the bank of canada rate, ${shortDate(data.usd_cad.date)}</div>`;
+    rows += `<div class="label">tolls</div>`;
+    let anyEstimate = false;
+    for (const r of info.tolls.rows) {
+      const [line, estimated] = tollLine(r);
+      anyEstimate = anyEstimate || estimated;
+      rows += `<div>${line}</div>`;
+    }
+    if (anyEstimate && data.usd_cad) {
+      rows += `<div class="as-of">≈ is our estimate at the bank of canada rate of ${shortDate(data.usd_cad.date)} — not a posted price</div>`;
+    }
   }
   rows += hazmatLine(info.hazmat);
   return `<hr class="rule"><div class="facts">${rows}</div>`;
