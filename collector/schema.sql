@@ -49,6 +49,44 @@ CREATE TABLE IF NOT EXISTS raw_snapshots (
 CREATE INDEX IF NOT EXISTS idx_raw_snapshots_fetched
   ON raw_snapshots (fetched_at);
 
+-- Approach-road and weather alerts, one row per alert (not per fetch).
+-- The collector upserts on (source, external_id): first_seen_at is set once,
+-- last_seen_at advances every 5-minute poll the alert is still present —
+-- so each row records the alert's full lifespan for the archive.
+CREATE TABLE IF NOT EXISTS alerts (
+  id INTEGER PRIMARY KEY,
+  source TEXT NOT NULL,               -- 'on511_event' | 'on511_alert' | 'on511_roadcondition' | 'mdot_incident' | 'nws' | 'eccc'
+  external_id TEXT NOT NULL,          -- the source's own id for this alert
+  side TEXT NOT NULL CHECK (side IN ('ca', 'us')),
+  event_type TEXT,                    -- 'roadwork' | 'incident' | 'weather' | 'road_condition' | 'notice' ...
+  title TEXT,
+  description TEXT,
+  roadway TEXT,
+  direction_of_travel TEXT,
+  lanes_affected TEXT,
+  is_full_closure INTEGER,
+  severity TEXT,
+  latitude REAL,
+  longitude REAL,
+  starts_at TEXT,                     -- planned events can start in the future
+  ends_at TEXT,
+  reported_at TEXT,                   -- the source's own timestamp (UTC ISO 8601)
+  first_seen_at TEXT NOT NULL,        -- when our collector first saw it
+  last_seen_at TEXT NOT NULL,         -- when our collector last saw it
+  raw TEXT,                           -- the source's item, as JSON, for re-derivation
+  UNIQUE (source, external_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_alerts_last_seen ON alerts (last_seen_at);
+
+-- Which crossings an alert affects. Many-to-many: a Windsor weather warning
+-- covers both the Ambassador and the tunnel.
+CREATE TABLE IF NOT EXISTS alert_crossings (
+  alert_id INTEGER NOT NULL REFERENCES alerts(id),
+  crossing_id INTEGER NOT NULL REFERENCES crossings(id),
+  PRIMARY KEY (alert_id, crossing_id)
+);
+
 -- The crossings we launch with. Tunnel and Blue Water are archived from day one
 -- (the archive cannot be backfilled); Gordie Howe activates when its feed appears.
 INSERT OR IGNORE INTO crossings (id, slug, name, cbp_port_name, cbp_crossing_name, cbsa_office_name, active) VALUES

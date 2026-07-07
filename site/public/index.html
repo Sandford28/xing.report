@@ -119,6 +119,17 @@ header {
 
 .rule { border: none; border-top: 1px solid var(--hairline); margin: 16px 0; }
 
+/* alert strip — one line per card (§5). with an incident: ink field, paper
+   text, 700. without: recedes. unavailable: recedes, and says so. */
+.alert-line {
+  background: var(--ink); color: var(--paper); font-weight: 700;
+  padding: 8px 16px; margin-bottom: 16px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.alert-none {
+  color: var(--receded); font-weight: 400; margin-bottom: 16px;
+}
+
 /* the two clocks — plain language, told apart by wording */
 .fresh { color: var(--muted); }
 
@@ -154,8 +165,10 @@ footer {
 </main>
 
 <footer>
-  wait times: u.s. customs and border protection (into the u.s.) ·
-  canada border services agency (into canada). checked every 5 minutes.
+  wait times: u.s. customs and border protection · canada border services agency<br>
+  road alerts: ontario 511 · mdot mi drive<br>
+  weather alerts: u.s. national weather service · environment and climate change canada<br>
+  checked every 5 minutes
 </footer>
 
 <script>
@@ -215,6 +228,42 @@ function minorLaneHtml(r, picto, label) {
   </div>`;
 }
 
+// which town each side's alerts speak for, per crossing
+const SIDE_LABELS = {
+  'ambassador-bridge': { ca: 'windsor', us: 'detroit' },
+  'detroit-windsor-tunnel': { ca: 'windsor', us: 'detroit' },
+  'blue-water-bridge': { ca: 'sarnia', us: 'port huron' },
+};
+
+const DIR_ABBR = { northbound: 'nb', southbound: 'sb', eastbound: 'eb', westbound: 'wb' };
+
+// one strip line per card. priority: full closures first (api pre-sorts),
+// then the newest. more than one alert becomes "+ n more".
+function alertLineText(a, slug) {
+  const place = (SIDE_LABELS[slug] || {})[a.side] || '';
+  if (a.event_type === 'weather') {
+    return `${place} weather: ${a.title}`;
+  }
+  const road = (a.roadway || '').toLowerCase();
+  const dir = DIR_ABBR[(a.direction_of_travel || '').toLowerCase()] || '';
+  const what = a.is_full_closure ? 'all lanes closed'
+    : (a.lanes_affected || a.event_type || '').toLowerCase();
+  if (road) return `${road} ${dir}`.trim() + ` (${place}): ${what}`;
+  return `${place}: ${(a.title || what)}`;
+}
+
+function alertStripHtml(crossing) {
+  // never claim "no incidents" unless our alert collection is actually current
+  const checked = data.alerts_checked_at ? minsAgo(data.alerts_checked_at) : null;
+  if (checked === null || checked > 15) {
+    return `<div class="alert-none">incident reports unavailable</div>`;
+  }
+  const alerts = crossing.alerts || [];
+  if (!alerts.length) return `<div class="alert-none">no incidents</div>`;
+  const more = alerts.length > 1 ? ` +${alerts.length - 1} more` : '';
+  return `<div class="alert-line">${alertLineText(alerts[0], crossing.slug)}${more}</div>`;
+}
+
 // the two clocks, told apart in plain words:
 // one says how old the border's own reading is, the other says when WE last checked.
 function freshHtml(readings) {
@@ -258,6 +307,7 @@ function cardHtml(crossing) {
 
   return `<section class="card">
     <h2 class="bridge">${crossing.name}</h2>
+    ${alertStripHtml(crossing)}
     ${hero}
     ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
     ${freshHtml(crossing.readings)}

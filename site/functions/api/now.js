@@ -40,8 +40,36 @@ export async function onRequest({ env }) {
   const laneKey = (r) => `${r.crossing_id}/${r.direction}/${r.lane_category}/${r.lane_type}`;
   const priorByLane = new Map(prior.map((r) => [laneKey(r), r.wait_minutes]));
 
+  // Active alerts: still present in the source's feed as of the last ~15 min,
+  // currently in effect (planned future roadwork stays out until it starts),
+  // not cleared, and not a low-importance provincewide notice.
+  const nowIso = new Date(now).toISOString();
+  const activeSince = new Date(now - 15 * 60000).toISOString();
+  const { results: alerts } = await env.DB.prepare(
+    `SELECT ac.crossing_id, a.source, a.side, a.event_type, a.title, a.description,
+            a.roadway, a.direction_of_travel, a.lanes_affected, a.is_full_closure,
+            a.severity, a.reported_at, a.first_seen_at
+     FROM alerts a
+     JOIN alert_crossings ac ON ac.alert_id = a.id
+     WHERE a.last_seen_at >= ?
+       AND (a.starts_at IS NULL OR a.starts_at <= ?)
+       AND (a.ends_at IS NULL OR a.ends_at >= ?)
+       AND a.event_type != 'incident_cleared'
+       AND NOT (a.event_type = 'notice' AND (a.severity IS NULL OR a.severity != 'high'))
+     ORDER BY a.is_full_closure DESC, a.first_seen_at DESC`
+  ).bind(activeSince, nowIso, nowIso).all();
+
+  // When our alert collection last succeeded — the page uses this to say
+  // "incident reports unavailable" instead of a false "no incidents".
+  const alertsChecked = await env.DB.prepare(
+    `SELECT max(fetched_at) AS t FROM raw_snapshots
+     WHERE source IN ('on511_event', 'on511_roadcondition', 'on511_alert', 'mdot_incident', 'nws', 'eccc')
+       AND error IS NULL`
+  ).first();
+
   const payload = {
-    generated_at: new Date(now).toISOString(),
+    generated_at: nowIso,
+    alerts_checked_at: alertsChecked?.t ?? null,
     crossings: crossings.map((c) => ({
       slug: c.slug,
       name: c.name,
@@ -51,6 +79,9 @@ export async function onRequest({ env }) {
           ...rest,
           trend: trendWord(rest.wait_minutes, priorByLane.get(laneKey({ crossing_id, ...rest }))),
         })),
+      alerts: alerts
+        .filter((a) => a.crossing_id === c.id)
+        .map(({ crossing_id, ...rest }) => rest),
     })),
   };
 

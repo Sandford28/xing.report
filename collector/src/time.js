@@ -10,6 +10,12 @@ const TZ_OFFSET_HOURS = {
   PDT: -7, PST: -8,
 };
 
+// Ontario 511 reports times as Unix epoch seconds.
+export function epochToIso(seconds) {
+  if (typeof seconds !== 'number' || seconds <= 0) return null;
+  return new Date(seconds * 1000).toISOString();
+}
+
 // Build a UTC ISO timestamp from local date/time parts + a timezone abbreviation.
 // Returns null if the abbreviation is unknown — better no timestamp than a wrong one.
 export function zonedToUtcIso(year, month, day, hour, minute, tz) {
