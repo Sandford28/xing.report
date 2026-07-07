@@ -1,6 +1,9 @@
 // GET /api/now — the latest reading for every lane of every active crossing,
-// plus a trend word computed against the archive.
-// This is the website's only door into the database. It reads; it never writes.
+// plus alerts, trends, hand-maintained facts (tolls, hazmat, statuses), and
+// the official exchange rate.
+// This is the website's door into the database. It reads; it never writes.
+
+import { CROSSING_INFO } from '../_lib/crossing-info.js';
 
 export async function onRequest({ env }) {
   const now = Date.now();
@@ -67,12 +70,25 @@ export async function onRequest({ env }) {
        AND error IS NULL`
   ).first();
 
+  // Official Bank of Canada USD/CAD rate — for showing a USD-only toll in
+  // CAD (and vice versa) so a driver never does currency math.
+  const fx = await env.DB.prepare(
+    "SELECT date, rate FROM fx_rates WHERE pair = 'USDCAD' ORDER BY date DESC LIMIT 1"
+  ).first();
+
+  // The Gordie Howe status section is hand-maintained and shown even while
+  // the crossing is inactive for wait times.
+  const gordie = CROSSING_INFO['gordie-howe-bridge'];
+
   const payload = {
     generated_at: nowIso,
     alerts_checked_at: alertsChecked?.t ?? null,
+    usd_cad: fx ? { date: fx.date, rate: fx.rate } : null,
+    gordie_howe: gordie ? { status: gordie.status, hazmat: gordie.hazmat } : null,
     crossings: crossings.map((c) => ({
       slug: c.slug,
       name: c.name,
+      info: CROSSING_INFO[c.slug] ?? null,
       readings: latest
         .filter((r) => r.crossing_id === c.id)
         .map(({ crossing_id, ...rest }) => ({

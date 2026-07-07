@@ -133,6 +133,38 @@ header {
 /* the two clocks — plain language, told apart by wording */
 .fresh { color: var(--muted); }
 
+/* hand-maintained facts: tolls, hazmat */
+.facts { font-size: 15px; line-height: 20px; }
+.facts .label {
+  font-size: 13px; line-height: 16px; letter-spacing: 0.08em;
+  color: var(--muted); margin-bottom: 8px;
+}
+.facts .unverified { color: var(--receded); }
+
+/* gordie howe status */
+.status-headline { font-size: 28px; line-height: 32px; font-weight: 700; margin-bottom: 8px; }
+.status-note { margin-bottom: 8px; }
+.as-of { font-size: 13px; line-height: 16px; color: var(--muted); }
+
+/* email signup — glove-sized targets, hard edges */
+.signup { margin-top: 16px; }
+.signup input[type="email"] {
+  display: block; width: 100%; height: 56px; padding: 0 16px;
+  font: 400 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--ink); background: var(--paper);
+  border: 2px solid var(--ink); border-radius: 0;
+  margin-bottom: 8px;
+}
+.signup button {
+  display: block; width: 100%; height: 56px;
+  font: 700 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-transform: lowercase;
+  color: var(--paper); background: var(--ink);
+  border: none; border-radius: 0; cursor: pointer;
+}
+.signup .hp { display: none; }
+.signup-msg { margin-top: 8px; }
+
 footer {
   max-width: 480px; margin: 0 auto; padding: 0 16px 24px;
   font-size: 13px; line-height: 16px; color: var(--muted);
@@ -162,12 +194,16 @@ footer {
     <button id="btn-to_us" aria-pressed="false">win → det</button>
   </nav>
   <div id="cards"><div class="fresh">loading…</div></div>
+  <!-- rendered once, outside the 30s re-render, so typing in the signup
+       form is never wiped by a refresh -->
+  <div id="gordie"></div>
 </main>
 
 <footer>
   wait times: u.s. customs and border protection · canada border services agency<br>
   road alerts: ontario 511 · mdot mi drive<br>
   weather alerts: u.s. national weather service · environment and climate change canada<br>
+  exchange rate: bank of canada daily rate<br>
   checked every 5 minutes
 </footer>
 
@@ -281,6 +317,100 @@ function freshHtml(readings) {
   return `<div class="fresh">${lines.join('<br>')}</div>`;
 }
 
+function money(n) {
+  return '$' + n.toFixed(2);
+}
+
+function shortDate(iso) {
+  if (!iso) return '';
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(iso + 'T00:00:00Z')).toLowerCase();
+}
+
+// tolls as posted by the operator; a missing currency is converted at the
+// bank of canada rate and marked "≈" so posted and computed never blur.
+function tollLine(row) {
+  const parts = [];
+  if (row.usd !== null && row.usd !== undefined) parts.push(`${money(row.usd)} usd`);
+  if (row.cad !== null && row.cad !== undefined) parts.push(`${money(row.cad)} cad`);
+  else if (row.usd !== null && data.usd_cad) parts.push(`≈${money(row.usd * data.usd_cad.rate)} cad`);
+  const note = row.note ? ` (${row.note})` : '';
+  return `${row.label} — ${parts.join(' · ')}${note}`;
+}
+
+// hazmat is safety information: verified-with-date or explicitly unverified,
+// never guessed, never silently absent.
+function hazmatLine(hazmat) {
+  if (hazmat && hazmat.status) {
+    return `<div>hazmat: ${hazmat.status} <span class="as-of">· verified ${shortDate(hazmat.last_verified)}</span></div>`;
+  }
+  return `<div class="unverified">hazmat rules: not yet verified — check with the crossing operator</div>`;
+}
+
+function factsHtml(info) {
+  if (!info) return '';
+  let rows = '';
+  if (info.tolls) {
+    rows += `<div class="label">tolls · as posted ${shortDate(info.tolls.as_of)}</div>`;
+    rows += info.tolls.rows.map((r) => `<div>${tollLine(r)}</div>`).join('');
+    if (data.usd_cad) rows += `<div class="as-of">≈ at the bank of canada rate, ${shortDate(data.usd_cad.date)}</div>`;
+  }
+  rows += hazmatLine(info.hazmat);
+  return `<hr class="rule"><div class="facts">${rows}</div>`;
+}
+
+function gordieCardHtml(g) {
+  if (!g || !g.status) return '';
+  return `<section class="card">
+    <h2 class="bridge">gordie howe bridge</h2>
+    <div class="status-headline">${g.status.headline}</div>
+    <div class="status-note">${g.status.note}</div>
+    <div class="as-of">as of ${shortDate(g.status.as_of)}</div>
+    <hr class="rule">
+    <div class="facts">${hazmatLine(g.hazmat)}</div>
+    <hr class="rule">
+    <form class="signup" id="signup">
+      <div class="facts" style="margin-bottom:8px">get one email when the bridge opens. nothing else.</div>
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
+      <input type="email" name="email" placeholder="you@example.com" required autocomplete="email" aria-label="email address">
+      <button type="submit">email me when it opens</button>
+      <div class="signup-msg" id="signup-msg"></div>
+    </form>
+  </section>`;
+}
+
+function bindSignup() {
+  const form = document.getElementById('signup');
+  if (!form) return;
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const msg = document.getElementById('signup-msg');
+    const button = form.querySelector('button');
+    button.disabled = true;
+    msg.textContent = 'saving…';
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          email: form.elements.email.value,
+          website: form.elements.website.value,
+        }),
+      });
+      const out = await res.json();
+      if (out.ok) {
+        form.innerHTML = '<div class="facts">you’re on the list — one email when it opens.</div>';
+      } else {
+        msg.textContent = out.error || 'something went wrong — try again';
+        button.disabled = false;
+      }
+    } catch {
+      msg.textContent = 'could not reach the server — try again';
+      button.disabled = false;
+    }
+  });
+}
+
 function cardHtml(crossing) {
   const truck = lane(crossing.readings, 'commercial', 'standard');
   const car = lane(crossing.readings, 'passenger', 'standard');
@@ -311,6 +441,7 @@ function cardHtml(crossing) {
     ${hero}
     ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
     ${freshHtml(crossing.readings)}
+    ${factsHtml(crossing.info)}
   </section>`;
 }
 
@@ -339,6 +470,13 @@ function render() {
 
   for (const dir of ['to_canada', 'to_us']) {
     document.getElementById('btn-' + dir).setAttribute('aria-pressed', String(dir === direction));
+  }
+
+  // once only — see the comment on #gordie
+  const gordie = document.getElementById('gordie');
+  if (!gordie.innerHTML && data.gordie_howe) {
+    gordie.innerHTML = gordieCardHtml(data.gordie_howe);
+    bindSignup();
   }
 }
 

@@ -13,6 +13,7 @@ import * as on511 from './on511.js';
 import * as mdot from './mdot.js';
 import * as nws from './nws.js';
 import * as eccc from './eccc.js';
+import * as boc from './boc.js';
 
 const WAIT_SOURCES = { cbp, cbsa };
 const RAW_RETENTION_DAYS = 7;
@@ -44,6 +45,7 @@ async function collect(env) {
   await Promise.all([
     ...Object.keys(WAIT_SOURCES).map((name) => collectWaitSource(env, name, crossings, fetchedAt)),
     ...alertFeeds.map((feed) => collectAlertFeed(env, feed, crossings, fetchedAt)),
+    boc.maybeCollect(env, fetchedAt, USER_AGENT),
   ]);
 
   // Prune old raw snapshots; parsed readings and alerts are kept forever.

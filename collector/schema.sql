@@ -87,6 +87,24 @@ CREATE TABLE IF NOT EXISTS alert_crossings (
   PRIMARY KEY (alert_id, crossing_id)
 );
 
+-- Official Bank of Canada daily exchange rate, one row per business day —
+-- so tolls can display in both currencies without a driver doing math.
+CREATE TABLE IF NOT EXISTS fx_rates (
+  date TEXT NOT NULL,                 -- the observation date (Bank of Canada's)
+  pair TEXT NOT NULL,                 -- 'USDCAD'
+  rate REAL NOT NULL,
+  fetched_at TEXT NOT NULL,
+  PRIMARY KEY (date, pair)
+);
+
+-- "Get one email when the bridge opens." Stored here, no third-party service.
+CREATE TABLE IF NOT EXISTS subscribers (
+  id INTEGER PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  created_at TEXT NOT NULL,
+  unsubscribed_at TEXT
+);
+
 -- The crossings we launch with. Tunnel and Blue Water are archived from day one
 -- (the archive cannot be backfilled); Gordie Howe activates when its feed appears.
 INSERT OR IGNORE INTO crossings (id, slug, name, cbp_port_name, cbp_crossing_name, cbsa_office_name, active) VALUES
