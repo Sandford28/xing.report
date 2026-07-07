@@ -1,11 +1,11 @@
-# xing.report — design spec v1.1
+# xing.report — design spec v1.2
 
 Live border-crossing utility, Detroit–Windsor corridor.
-One question: **which bridge do I take right now?**
-Audience: truck drivers and dispatchers, phone in a cab, sunlight, seconds.
-Design language: Otl Aicher / Ulm / Munich 1972 wayfinding. Signage, not a website.
+One question: **which crossing do I take right now?**
+Audience: everyday travelers plus truck drivers and dispatchers — phone in a car or cab, sunlight, seconds.
+Design language: Otl Aicher / Ulm / Munich 1972 wayfinding. Signage, not a website. Warmth comes from copy, never decoration.
 
-Date: 06 jul 2026
+Date: 07 jul 2026 · v1.2 adds: three crossings, "fastest right now" summary, traveler-first hierarchy, friendly copy register, best-time-to-cross chart.
 
 ---
 
@@ -61,10 +61,12 @@ Appears once per screen, in the wordmark (`.report`). Never in UI states, never 
 
 | role | size / line | weight | notes |
 |---|---|---|---|
-| wait numeral | 96 / 91 | 700 | `font-variant-numeric: tabular-nums`, tracking −0.02em, `white-space: nowrap` |
+| wait numeral (trucker view) | 96 / 91 | 700 | `font-variant-numeric: tabular-nums`, tracking −0.02em, `white-space: nowrap` |
+| wait numeral (3-crossing view) | 72 / 68 | 700 | same rules; smaller so three cards fit one scroll |
 | nexus numeral | 40 / 40 | 700 | tabular-nums |
-| bridge name | 28 / 32 | 700 | |
-| status word | 20 | 700 on fill · 400 unfilled (moving) | lowercase, inside signal field |
+| crossing name | 28 / 32 (single card) · 22 / 26 (3-crossing list) | 700 | |
+| summary strip | label 13 · name + numeral 28 / 32, 700 | | "fastest right now" |
+| status word | 20 (single card) · 16 (3-crossing list) | 700 on fill · 400 unfilled (moving) | lowercase, inside signal field |
 | trend line | 15 / 16 | 700 climbing · 400 easing/steady | one word only: ▲ climbing · ▼ easing · — steady |
 | meta / body | 15 / 20 | 400 | tolls, direction, source line |
 | label | 13 / 16 | 400 | tracking +0.08em, lowercase (truck / car / nexus) |
@@ -94,24 +96,27 @@ Appears once per screen, in the wordmark (`.report`). Never in UI states, never 
 
 ## 5 · Behavior rules
 
-- **Status thresholds** (by truck wait): < 20 min = moving · 20–59 = slow · ≥ 60 = backed up.
+- **Status thresholds** — trucker view (by truck wait): < 20 min = moving · 20–59 = slow · ≥ 60 = backed up. Traveler view (by car wait): < 15 = moving · 15–44 = slow · ≥ 45 = backed up.
+- **Summary strip:** "fastest right now" sits above everything — label 13px, crossing name + car minutes 28px 700. It answers the whole question for people who won't read further. Recomputes with the direction toggle.
+- **Crossings:** ambassador, detroit–windsor tunnel (cars only — sub-line reads "cars only" where truck wait would be), blue water bridge.
+- **Hierarchy (traveler view):** car wait is the hero numeral; truck + nexus waits move to a 15px sub-line.
 - **Trend:** every lane always shows exactly one word next to its wait — ▲ climbing · ▼ easing · — steady — based on the last 15–30 min. Never a number, never blank. Climbing is ink-dark 700; easing and steady recede.
 - **Hierarchy:** nothing on a card renders larger than the wait numeral.
 - **Freshness:** "updated n min ago" is mandatory on every live view; stale > 10 min shows a warning strip.
 - **Alert strip:** one line per card. With an incident: ink field, paper text, 700. Without: "no incidents" unfilled in receded color, 400.
-- **Direction toggle:** two cells, det → win / win → det; active cell is inverted (ink fill, paper text). One toggle drives all cards.
+- **Direction toggle:** two cells; traveler copy "to windsor" / "to detroit" (trucker view: "det → win" / "win → det"). Active cell is inverted (ink fill, paper text). One toggle drives all cards and the summary strip.
+- **Copy register (traveler warmth):** "checked 2 min ago" over "updated", "min by car" over bare units, "safe travels · data from cbsa + cbp lane sensors" as the footer. Warmth is words only — geometry, color, and edges never soften.
 - **Night mode:** same geometry, swapped palette per §1.
 
 ---
 
-## 6 · Chart style ("corridor by the numbers")
+## 6 · Chart styles
 
-- Bars in ink only — signal colors never fill data.
-- One reference line (1px hairline) with a right-aligned tabular label.
-- Baseline is a 2px ink rule.
-- Axis labels 13px lowercase, single-letter months.
-- Bar gap 8px (1u). No gridlines beyond the single reference line.
-- One callout row max (e.g. "peak · april 2026 — 251k"), 15px, value 700 tabular.
+Shared rules — bars in ink only (signal colors never fill data), one reference line (1px hairline, right-aligned tabular label), baseline 2px ink rule, axis labels 13px lowercase, no gridlines beyond the reference line.
+
+**"corridor by the numbers"** (monthly volume): 12 bars, gap 8px (1u), single-letter months. One callout row max (e.g. "peak · april 2026 — 251k"), 15px, value 700 tabular.
+
+**"best time to cross"** (hourly wait): 24 bars, gap 4px, sparse hour ticks (12a · 6a · 12p · 6p · 11p). Two callout rows: quietest window in quiet-green text (`#008A43` day / `#3FD37F` night, 400) and busiest window in ink 700 — color always paired with words.
 
 ---
 

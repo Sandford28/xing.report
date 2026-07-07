@@ -64,6 +64,10 @@ header {
 }
 #stale.show { display: block; }
 
+/* ============ the one-line answer (v2 step 1) ============ */
+.fastest { font-size: 20px; line-height: 24px; padding-bottom: 16px; }
+.fastest strong { font-weight: 700; }
+
 /* ============ direction toggle — §5, tap targets §3 ============ */
 .toggle {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -83,6 +87,8 @@ header {
 /* ============ crossing card ============ */
 .card { border: 2px solid var(--ink); padding: 24px; margin-bottom: 16px; }
 .bridge { font-size: 28px; line-height: 32px; font-weight: 700; margin-bottom: 16px; }
+/* where a crossing is, when it isn't obvious (blue water) */
+.place { color: var(--muted); margin: -12px 0 16px; }
 
 .lane-label {
   display: flex; align-items: center; gap: 8px;
@@ -133,13 +139,40 @@ header {
 /* the two clocks — plain language, told apart by wording */
 .fresh { color: var(--muted); }
 
-/* hand-maintained facts: tolls, hazmat */
-.facts { font-size: 15px; line-height: 20px; }
+/* reference facts fold away behind one glove-sized tap (§3) — the live
+   screen stays calm; tolls are planning info, not glancing info */
+.more { border-top: 1px solid var(--hairline); margin-top: 16px; }
+.more summary {
+  min-height: 56px; display: flex; align-items: center; justify-content: space-between;
+  font-weight: 700; cursor: pointer; list-style: none;
+}
+.more summary::-webkit-details-marker { display: none; }
+.more summary::after { content: '+'; font-size: 20px; font-weight: 400; color: var(--muted); }
+.more[open] summary::after { content: '−'; }
+
+/* hand-maintained facts: tolls, hazmat — read at arm's length: the answer
+   is bold on its own line, details are short lines, phone numbers become
+   glove-sized call buttons */
+.facts { font-size: 17px; line-height: 24px; padding-bottom: 16px; }
 .facts .label {
   font-size: 13px; line-height: 16px; letter-spacing: 0.08em;
   color: var(--muted); margin-bottom: 8px;
 }
+.facts .label:not(:first-child) { margin-top: 20px; }
+.facts .as-of { font-size: 13px; line-height: 16px; margin-top: 4px; }
 .facts .unverified { color: var(--receded); }
+.fact-main { font-weight: 700; }
+.toll-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px; flex-wrap: wrap; margin-top: 4px;
+}
+.toll-row .toll-price { font-weight: 700; font-variant-numeric: tabular-nums; }
+.call {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 56px; margin-top: 8px;
+  border: 2px solid var(--ink); color: var(--ink);
+  font-weight: 700; text-decoration: none;
+}
 
 /* gordie howe status */
 .status-headline { font-size: 28px; line-height: 32px; font-weight: 700; margin-bottom: 8px; }
@@ -189,6 +222,7 @@ footer {
 <div id="stale"></div>
 
 <main>
+  <div id="fastest"></div>
   <nav class="toggle" aria-label="direction">
     <button id="btn-to_canada" aria-pressed="true">det → win</button>
     <button id="btn-to_us" aria-pressed="false">win → det</button>
@@ -300,21 +334,17 @@ function alertStripHtml(crossing) {
   return `<div class="alert-line">${alertLineText(alerts[0], crossing.slug)}${more}</div>`;
 }
 
-// the two clocks, told apart in plain words:
-// one says how old the border's own reading is, the other says when WE last checked.
-function freshHtml(readings) {
-  const src = readings.find((r) => r.lane_category === 'commercial' && r.direction === direction)
+// the two clocks, told apart in plain words, on one quiet line:
+// how old the border's own reading is · when WE last checked.
+function freshHtml(readings, heroCategory) {
+  const src = readings.find((r) => r.lane_category === heroCategory && r.lane_type === 'standard' && r.direction === direction)
            || readings.find((r) => r.direction === direction);
   if (!src) return '';
-  const lines = [];
-  if (src.feed_updated_at) {
-    lines.push(`the border reported this wait at ${clock(src.feed_updated_at)}`);
-  } else {
-    lines.push(`the border gave no time for this reading`);
-  }
+  const reported = src.feed_updated_at
+    ? `border reported this at ${clock(src.feed_updated_at)}`
+    : `border gave no time for this reading`;
   const checked = minsAgo(src.fetched_at);
-  lines.push(`we checked for updates ${checked === 0 ? 'just now' : `${checked} min ago`}`);
-  return `<div class="fresh">${lines.join('<br>')}</div>`;
+  return `<div class="fresh">${reported} · we checked ${checked === 0 ? 'just now' : `${checked} min ago`}</div>`;
 }
 
 function money(n) {
@@ -334,26 +364,42 @@ function tollLine(row) {
   const parts = [];
   let estimated = false;
   if (row.usd !== null && row.usd !== undefined) parts.push(`${money(row.usd)} usd`);
+  else if (row.cad !== null && row.cad !== undefined && data.usd_cad) {
+    parts.push(`≈${money(row.cad / data.usd_cad.rate)} usd`);
+    estimated = true;
+  }
   if (row.cad !== null && row.cad !== undefined) parts.push(`${money(row.cad)} cad`);
-  else if (row.usd !== null && data.usd_cad) {
+  else if (row.usd !== null && row.usd !== undefined && data.usd_cad) {
     parts.push(`≈${money(row.usd * data.usd_cad.rate)} cad`);
     estimated = true;
   }
-  const note = row.note ? ` (${row.note})` : '';
-  const asOf = row.as_of ? ` <span class="as-of">· posted ${shortDate(row.as_of)}</span>` : '';
-  return [`${row.label} — ${parts.join(' · ')}${note}${asOf}`, estimated];
+  // the price reads as one clean line; notes and dates recede to fine print
+  const meta = [];
+  if (row.note) meta.push(row.note);
+  if (row.as_of) meta.push(`posted ${shortDate(row.as_of)}`);
+  const metaHtml = meta.length ? `<div class="as-of">${meta.join(' · ')}</div>` : '';
+  return [`<div class="toll-row"><span>${row.label}</span><span class="toll-price">${parts.join(' · ')}</span></div>${metaHtml}`, estimated];
+}
+
+// short detail lines plus a glove-sized tap-to-call button — shared by
+// limits and hazmat. while driving, tapping to call beats reading a number.
+function factLines(entry) {
+  let out = '';
+  for (const d of entry.detail || []) out += `<div>${d}</div>`;
+  if (entry.phone) out += `<a class="call" href="tel:${entry.phone}">${entry.phone_label || 'call'}</a>`;
+  return out;
 }
 
 // hazmat is safety information: verified-with-date or explicitly unverified,
 // never guessed, never silently absent.
 function hazmatLine(hazmat) {
   if (hazmat && hazmat.status) {
-    return `<div>hazmat: ${hazmat.status} <span class="as-of">· verified ${shortDate(hazmat.last_verified)}</span></div>`;
+    return `<div class="label">hazmat</div><div class="fact-main">${hazmat.status}</div>${factLines(hazmat)}<div class="as-of">verified ${shortDate(hazmat.last_verified)}</div>`;
   }
-  return `<div class="unverified">hazmat rules: not yet verified — check with the crossing operator</div>`;
+  return `<div class="label">hazmat</div><div class="unverified">not yet verified — check with the crossing operator</div>`;
 }
 
-function factsHtml(info) {
+function factsHtml(info, slug) {
   if (!info) return '';
   let rows = '';
   if (info.tolls) {
@@ -362,14 +408,26 @@ function factsHtml(info) {
     for (const r of info.tolls.rows) {
       const [line, estimated] = tollLine(r);
       anyEstimate = anyEstimate || estimated;
-      rows += `<div>${line}</div>`;
+      rows += line;
     }
     if (anyEstimate && data.usd_cad) {
       rows += `<div class="as-of">≈ is our estimate at the bank of canada rate of ${shortDate(data.usd_cad.date)} — not a posted price</div>`;
     }
   }
+  if (info.hours) {
+    rows += `<div class="label">hours</div>`;
+    rows += `<div class="fact-main">${info.hours.text}</div><div class="as-of">checked ${shortDate(info.hours.as_of)}</div>`;
+  }
+  if (info.limits) {
+    rows += `<div class="label">limits</div>`;
+    rows += `<div class="fact-main">${info.limits.text}</div>${factLines(info.limits)}`;
+    rows += `<div class="as-of">checked ${shortDate(info.limits.as_of)}</div>`;
+  }
   rows += hazmatLine(info.hazmat);
-  return `<hr class="rule"><div class="facts">${rows}</div>`;
+  return `<details class="more" data-slug="${slug}">
+    <summary>tolls &amp; rules</summary>
+    <div class="facts">${rows}</div>
+  </details>`;
 }
 
 function gordieCardHtml(g) {
@@ -424,49 +482,96 @@ function bindSignup() {
   });
 }
 
+// which lane leads a card. trucks lead by default (the corridor's working
+// traffic); the tunnel is a passenger crossing first, so cars lead there —
+// its truck lane (small trucks under the height limit) stays as a secondary
+// numeral rather than the hero.
+const HERO_LANE = { 'detroit-windsor-tunnel': 'car' };
+
 function cardHtml(crossing) {
-  const truck = lane(crossing.readings, 'commercial', 'standard');
-  const car = lane(crossing.readings, 'passenger', 'standard');
-  const nexus = lane(crossing.readings, 'passenger', 'nexus');
-  if (!truck && !car) return '';
+  const lanes = {
+    truck: lane(crossing.readings, 'commercial', 'standard'),
+    car: lane(crossing.readings, 'passenger', 'standard'),
+    nexus: lane(crossing.readings, 'passenger', 'nexus'),
+  };
+  if (!lanes.truck && !lanes.car) return '';
+
+  const heroKey = (HERO_LANE[crossing.slug] === 'car' || !lanes.truck) ? 'car' : 'truck';
+  const heroLane = lanes[heroKey];
 
   let hero = '';
-  if (truck) {
-    const s = truck.wait_minutes === null
-      ? { word: (truck.status_text || 'closed'), cls: 's-closed' }
-      : statusOf(truck.wait_minutes);
+  if (heroLane) {
+    const s = heroLane.wait_minutes === null
+      ? { word: (heroLane.status_text || 'closed'), cls: 's-closed' }
+      : statusOf(heroLane.wait_minutes);
     hero = `
-      <div class="lane-label">${PICTO.truck}truck</div>
+      <div class="lane-label">${PICTO[heroKey]}${heroKey}</div>
       <div class="hero-row">
-        ${numeralHtml(truck)}
+        ${numeralHtml(heroLane)}
         <span class="signal ${s.cls}">${s.word}</span>
       </div>
-      ${trendHtml(truck)}
+      ${trendHtml(heroLane)}
       <hr class="rule">`;
   }
 
-  const minors = [minorLaneHtml(car, 'car', 'car'), minorLaneHtml(nexus, 'nexus', 'nexus')]
-    .filter(Boolean).join('');
+  const minorKeys = heroKey === 'car' ? ['nexus', 'truck'] : ['car', 'nexus'];
+  const minors = minorKeys.map((k) => minorLaneHtml(lanes[k], k, k)).filter(Boolean).join('');
+
+  const place = crossing.info && crossing.info.place
+    ? `<div class="place">${crossing.info.place}</div>` : '';
 
   return `<section class="card">
     <h2 class="bridge">${crossing.name}</h2>
+    ${place}
     ${alertStripHtml(crossing)}
     ${hero}
     ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
-    ${freshHtml(crossing.readings)}
-    ${factsHtml(crossing.info)}
+    ${freshHtml(crossing.readings, heroKey === 'car' ? 'passenger' : 'commercial')}
+    ${factsHtml(crossing.info, crossing.slug)}
   </section>`;
+}
+
+// the one-line answer for everyday crossers, comparing car waits between
+// detroit and windsor. blue water sits out of this comparison — port huron
+// is 60 miles away, not a like-for-like alternative — its card is below.
+const FASTEST_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
+
+function fastestHtml() {
+  const dest = direction === 'to_canada' ? 'windsor' : 'detroit';
+  const open = [];
+  for (const slug of FASTEST_POOL) {
+    const c = data.crossings.find((x) => x.slug === slug);
+    const car = c && lane(c.readings, 'passenger', 'standard');
+    // never crown a winner on a closed lane or stale data
+    if (!car || car.wait_minutes === null || minsAgo(car.fetched_at) > 10) continue;
+    open.push({ name: c.name, wait: car.wait_minutes });
+  }
+  if (!open.length) return '';
+  open.sort((a, b) => a.wait - b.wait);
+  const forCars = (w) => (w === 0 ? 'no wait for cars' : `${w} min for cars`);
+  if (open.length > 1 && open[0].wait === open[open.length - 1].wait) {
+    return `<div class="fastest">to ${dest} right now: both crossings even — ${forCars(open[0].wait)}</div>`;
+  }
+  return `<div class="fastest">fastest to ${dest} right now: <strong>${open[0].name}</strong> — ${forCars(open[0].wait)}</div>`;
 }
 
 function render() {
   if (!data) return;
 
-  // phase 0: the ambassador bridge card. more crossings join this list in phase 1.
-  const show = ['ambassador-bridge'];
-  document.getElementById('cards').innerHTML = data.crossings
+  document.getElementById('fastest').innerHTML = fastestHtml();
+
+  // v2 step 1: all three live crossings. gordie howe joins when its feed appears.
+  const show = ['ambassador-bridge', 'detroit-windsor-tunnel', 'blue-water-bridge'];
+  const cardsEl = document.getElementById('cards');
+  // re-rendering must not snap a "tolls & rules" panel shut while it's being read
+  const openMore = new Set(
+    Array.from(cardsEl.querySelectorAll('details[open]')).map((d) => d.dataset.slug)
+  );
+  cardsEl.innerHTML = data.crossings
     .filter((c) => show.includes(c.slug))
     .map(cardHtml)
     .join('') || '<div class="fresh">no data available</div>';
+  for (const d of cardsEl.querySelectorAll('details')) d.open = openMore.has(d.dataset.slug);
 
   // warning strip fires on OUR pipeline falling behind (collector runs every
   // 5 min), not on the agencies' own slower clocks — keeps the warning meaningful.
