@@ -97,6 +97,18 @@ CREATE TABLE IF NOT EXISTS fx_rates (
   PRIMARY KEY (date, pair)
 );
 
+-- First-party, cookieless analytics: coarse daily tallies only. No cookies,
+-- no IP or user-agent, no per-visitor id, no full URLs — just enough to see
+-- whether the site is used and where visitors arrive from. Written by the
+-- site's /api/hit beacon, read by /api/stats.
+CREATE TABLE IF NOT EXISTS analytics (
+  day TEXT NOT NULL,                 -- YYYY-MM-DD, America/Detroit
+  metric TEXT NOT NULL,              -- 'view' | 'ref' | 'dir' | 'veh'
+  key TEXT NOT NULL,                 -- '' for view; referrer host; 'to_us'; 'truck' ...
+  count INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, metric, key)
+);
+
 -- "Get one email when the bridge opens." Stored here, no third-party service.
 CREATE TABLE IF NOT EXISTS subscribers (
   id INTEGER PRIMARY KEY,

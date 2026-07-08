@@ -956,6 +956,19 @@ async function loadPatterns() {
   render();
 }
 
+// first-party, cookieless page-view beacon — fired once per load. no cookies,
+// no id, no full url; the server keeps only coarse daily tallies (see /api/hit).
+(function beacon() {
+  try {
+    const body = JSON.stringify({ ref: document.referrer || '', dir: direction, veh: mode });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/hit', new Blob([body], { type: 'application/json' }));
+    } else {
+      fetch('/api/hit', { method: 'POST', keepalive: true, headers: { 'content-type': 'application/json' }, body });
+    }
+  } catch {}
+})();
+
 refresh().catch(() => {
   document.getElementById('cards').innerHTML = '<div class="fresh">we couldn\'t load the numbers — try reloading</div>';
 });
