@@ -26,8 +26,8 @@ export const CROSSING_INFO = {
         },
         {
           label: 'truck, per axle', usd: 20.0, cad: null, // operator posts USD only
-          note: 'with a-pass or e-zpass: $15.00 usd',
-          as_of: '2026-03-15',
+          note: 'with a-pass or e-zpass: $15.00 usd or less',
+          as_of: '2026-03-15', // operator's posted effective date; re-verified unchanged 2026-07-07
           source: 'https://www.ambassadorbridge.com/commercial/commercial-toll-rates/',
         },
         {
