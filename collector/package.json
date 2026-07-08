@@ -3,8 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev --test-scheduled"
+    "deploy": "wrangler deploy && wrangler deploy -c wrangler.alerts.toml",
+    "deploy:waits": "wrangler deploy",
+    "deploy:alerts": "wrangler deploy -c wrangler.alerts.toml",
+    "dev": "wrangler dev --test-scheduled",
+    "dev:alerts": "wrangler dev -c wrangler.alerts.toml --test-scheduled"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.3"

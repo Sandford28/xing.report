@@ -1,59 +1,25 @@
-// xing.report collector — runs every 5 minutes (see wrangler.toml).
-// Fetches the wait-time feeds (CBP, CBSA) and the alert feeds (Ontario 511,
-// MDOT, NWS, ECCC), parses them, and archives everything in D1.
+// Shared collection helpers, used by both collector workers:
+//  - waits.js  — the CBP/CBSA wait-time archive (+ the daily FX rate)
+//  - alerts.js — the Ontario 511 / MDOT / NWS / ECCC alert + weather feeds
+//
+// The two are split into separate workers on purpose: the wait-time archive is
+// the permanent asset and must never be starved of CPU or killed mid-run by the
+// much heavier alert/weather parsing (600 KB provincial XML). Each worker gets
+// its own 5-minute invocation and its own budget.
 //
 // Design rules honoured here:
 //  - one source failing never stops the others
 //  - a failed fetch is still recorded (so gaps in the archive are explainable)
 //  - a parse error still saves the raw body (so data can be re-derived)
 
-import * as cbp from './cbp.js';
-import * as cbsa from './cbsa.js';
-import * as on511 from './on511.js';
-import * as mdot from './mdot.js';
-import * as nws from './nws.js';
-import * as eccc from './eccc.js';
-import * as boc from './boc.js';
-
-const WAIT_SOURCES = { cbp, cbsa };
-const RAW_RETENTION_DAYS = 7;
+export const RAW_RETENTION_DAYS = 7;
 // Provincial feeds run to ~600 KB per fetch; archiving those raw every
 // 5 minutes would exhaust D1's free storage. Above this size we archive the
 // corridor-matched subset instead (full body still kept when parsing fails).
-const RAW_BODY_LIMIT = 50_000;
-const USER_AGENT = 'xing.report data collector (mark.b.sandford@gmail.com)';
+export const RAW_BODY_LIMIT = 50_000;
+export const USER_AGENT = 'xing.report data collector (mark.b.sandford@gmail.com)';
 
-export default {
-  async scheduled(controller, env, ctx) {
-    ctx.waitUntil(collect(env));
-  },
-};
-
-async function collect(env) {
-  const fetchedAt = new Date().toISOString();
-  const { results: crossings } = await env.DB
-    .prepare('SELECT * FROM crossings WHERE active = 1')
-    .all();
-
-  const alertFeeds = [
-    ...on511.FEEDS,
-    ...mdot.FEEDS,
-    ...nws.feedsFor(crossings),
-    ...eccc.feedsFor(crossings),
-  ];
-
-  await Promise.all([
-    ...Object.keys(WAIT_SOURCES).map((name) => collectWaitSource(env, name, crossings, fetchedAt)),
-    ...alertFeeds.map((feed) => collectAlertFeed(env, feed, crossings, fetchedAt)),
-    boc.maybeCollect(env, fetchedAt, USER_AGENT),
-  ]);
-
-  // Prune old raw snapshots; parsed readings and alerts are kept forever.
-  const cutoff = new Date(Date.now() - RAW_RETENTION_DAYS * 24 * 3600 * 1000).toISOString();
-  await env.DB.prepare('DELETE FROM raw_snapshots WHERE fetched_at < ?').bind(cutoff).run();
-}
-
-async function fetchFeed(url) {
+export async function fetchFeed(url) {
   let httpStatus = null;
   let body = null;
   let error = null;
@@ -68,14 +34,15 @@ async function fetchFeed(url) {
   return { httpStatus, body, error };
 }
 
-function snapshotStatement(env, source, fetchedAt, httpStatus, error, body) {
+export function snapshotStatement(env, source, fetchedAt, httpStatus, error, body) {
   return env.DB
     .prepare('INSERT INTO raw_snapshots (source, fetched_at, http_status, error, body) VALUES (?, ?, ?, ?, ?)')
     .bind(source, fetchedAt, httpStatus, error, body);
 }
 
-async function collectWaitSource(env, name, crossings, fetchedAt) {
-  const source = WAIT_SOURCES[name];
+// A single wait-time source (cbp | cbsa). `name` is both the raw_snapshots
+// source label and the readings.source value; `source` is the parser module.
+export async function collectWaitSource(env, name, source, crossings, fetchedAt) {
   const { httpStatus, body, error: fetchError } = await fetchFeed(source.FEED_URL);
   let error = fetchError;
   let readings = [];
@@ -135,7 +102,7 @@ const LINK_ALERT = `
   INSERT OR IGNORE INTO alert_crossings (alert_id, crossing_id)
   SELECT id, ? FROM alerts WHERE source = ? AND external_id = ?`;
 
-async function collectAlertFeed(env, feed, crossings, fetchedAt) {
+export async function collectAlertFeed(env, feed, crossings, fetchedAt) {
   const { httpStatus, body, error: fetchError } = await fetchFeed(feed.url);
   let error = fetchError;
   let items = [];
@@ -169,4 +136,11 @@ async function collectAlertFeed(env, feed, crossings, fetchedAt) {
       ...a.crossingIds.map((crossingId) => link.bind(crossingId, a.source, a.external_id)),
     ]),
   ]);
+}
+
+// Prune old raw snapshots; parsed readings and alerts are kept forever.
+// Owned by the wait-time worker (the one guaranteed to run every tick).
+export async function pruneRawSnapshots(env) {
+  const cutoff = new Date(Date.now() - RAW_RETENTION_DAYS * 24 * 3600 * 1000).toISOString();
+  await env.DB.prepare('DELETE FROM raw_snapshots WHERE fetched_at < ?').bind(cutoff).run();
 }

@@ -1,9 +1,14 @@
-# xing.report collector — scheduled Cloudflare Worker
-# Fetches the CBP and CBSA border wait-time feeds every 5 minutes
-# and archives every reading in D1. Knows nothing about web pages.
+# xing.report WAIT-TIME collector (worker A) — scheduled Cloudflare Worker.
+# Fetches the CBP and CBSA border wait-time feeds (+ the daily FX rate) every
+# 5 minutes and archives every reading in D1. Deliberately lean so the core
+# archive is never starved by the heavier alerts worker. Knows nothing about
+# web pages.
+#
+# Deploy: npm run deploy:waits    (or: wrangler deploy)
+# The alerts/weather half is a separate worker — see wrangler.alerts.toml.
 
 name = "xing-collector"
-main = "src/index.js"
+main = "src/waits.js"
 compatibility_date = "2026-07-01"
 
 [triggers]

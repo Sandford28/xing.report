@@ -1,0 +1,21 @@
+# xing.report ALERTS + WEATHER collector (worker B) — scheduled Cloudflare Worker.
+# Fetches Ontario 511, MDOT, NWS and ECCC every 5 minutes and upserts alerts
+# into the same D1 archive. Split from the wait-time worker so its heavy feeds
+# (600 KB provincial XML) can never starve or kill the core wait-time archive.
+#
+# Deploy: npm run deploy:alerts   (or: wrangler deploy -c wrangler.alerts.toml)
+
+name = "xing-collector-alerts"
+main = "src/alerts.js"
+compatibility_date = "2026-07-01"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "xing-report"
+database_id = "7f5e4bde-de8d-43b2-8707-b752d05766d7"
+
+[observability]
+enabled = true
