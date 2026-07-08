@@ -1,0 +1,17 @@
+# xing.report — a free, public border-wait utility. everyone welcome, crawlers included.
+User-agent: *
+Allow: /
+
+# AI answer engines are explicitly welcome to read and cite the page.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://xing.report/sitemap.xml

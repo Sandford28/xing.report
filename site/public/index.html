@@ -4,7 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>xing.report — detroit–windsor border waits</title>
+<title>xing.report — detroit–windsor border wait times</title>
+<meta name="description" content="live wait times for the detroit–windsor border. compare the ambassador bridge and the detroit–windsor tunnel, trucks and cars, both directions — updated every 5 minutes from cbp and cbsa. one glance tells you which crossing is fastest right now.">
+<link rel="canonical" href="https://xing.report/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#F4F4F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20width='24'%20height='24'%20fill='%230033FF'/%3E%3Cpath%20d='M5%205%20L19%2019%20M19%205%20L5%2019'%20stroke='white'%20stroke-width='4'/%3E%3C/svg%3E">
+<!-- open graph / twitter — for links shared to a dispatcher or on social -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="xing.report">
+<meta property="og:title" content="xing.report — detroit–windsor border wait times">
+<meta property="og:description" content="which bridge do i take right now? live ambassador bridge and detroit–windsor tunnel waits, updated every 5 minutes from cbp and cbsa.">
+<meta property="og:url" content="https://xing.report/">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="xing.report — detroit–windsor border wait times">
+<meta name="twitter:description" content="which bridge do i take right now? live ambassador bridge and detroit–windsor tunnel waits, updated every 5 minutes.">
+<!-- structured data: what the site is + the questions people (and AI answer engines) ask -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://xing.report/#website",
+      "name": "xing.report",
+      "url": "https://xing.report/",
+      "description": "Live border-crossing wait times for the Detroit–Windsor corridor: the Ambassador Bridge and the Detroit–Windsor Tunnel, trucks and cars, both directions, updated every five minutes from CBP and CBSA.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://xing.report/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I check the Ambassador Bridge wait time right now?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "xing.report shows the live Ambassador Bridge wait time for trucks and cars in both directions, updated every five minutes from U.S. Customs and Border Protection (CBP) and the Canada Border Services Agency (CBSA)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which is faster, the Ambassador Bridge or the Detroit–Windsor Tunnel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It changes through the day. xing.report compares the live wait at both crossings and names the fastest one for your direction and vehicle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can trucks use the Detroit–Windsor Tunnel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, but only small trucks — under 12 feet 8 inches tall and carrying no hazardous placards. Larger trucks and hazmat loads use the Ambassador Bridge or the Blue Water Bridge at Port Huron."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the Gordie Howe International Bridge open yet?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not yet. xing.report tracks its status and will send you one email when it opens."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often are the border wait times updated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every five minutes, straight from CBP and CBSA. If a reading is more than ten minutes old, xing.report says so rather than showing a stale number."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
 /* ============ design system v2 — high-vis industrial (DESIGN-SPEC §1) ============
    freight-first, blueprint-when-calm: when a lane is moving nothing fills, just
@@ -47,6 +125,11 @@ body {
 }
 main { max-width: 440px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 a { color: var(--cobalt); }
+/* readable by crawlers + screen readers, invisible on the calm glance screen */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 
 /* ============ wordmark + global freshness — §4 ============ */
 header {
@@ -326,6 +409,16 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
 <div id="stale"></div>
 
 <main>
+  <h1 class="sr-only">detroit–windsor border wait times — which bridge to take right now</h1>
+  <noscript>
+    <p>live wait times for the detroit–windsor border. this page shows the current
+    commercial (truck) and passenger (car) wait at the <strong>ambassador bridge</strong>
+    and the <strong>detroit–windsor tunnel</strong>, in both directions, updated every
+    five minutes from u.s. customs and border protection (cbp) and the canada border
+    services agency (cbsa). the <strong>blue water bridge</strong> at port huron is
+    included as a diversion option; the <strong>gordie howe international bridge</strong>
+    is not open yet. please enable javascript to see the live numbers.</p>
+  </noscript>
   <div id="fastest"></div>
   <nav class="toggle" aria-label="direction">
     <button id="btn-to_canada" aria-pressed="true">det &#8594; win</button>

@@ -1,0 +1,28 @@
+# xing.report
+
+> Free, live border-crossing wait times for the Detroit–Windsor corridor. It answers one question: which bridge do I take right now? Built for truck drivers, dispatchers, and everyday travelers.
+
+## What it is
+- Live wait times for two Detroit–Windsor crossings, compared side by side, in both directions (Detroit → Windsor and Windsor → Detroit), for trucks (commercial lanes) and cars (passenger lanes).
+- Updated every 5 minutes. If a reading is more than 10 minutes old, the site says so rather than showing a stale number.
+- No accounts, no ads, no tracking.
+
+## Crossings
+- Ambassador Bridge (Detroit–Windsor) — trucks and cars.
+- Detroit–Windsor Tunnel — cars, plus small trucks only (under 12 ft 8 in tall, no hazmat placards).
+- Blue Water Bridge (Port Huron–Sarnia, ~60 miles north) — shown as a diversion option.
+- Gordie Howe International Bridge — not open yet; the site tracks its status and offers one email when it opens.
+
+## Data sources (all free, public, government)
+- U.S. Customs and Border Protection (CBP) — wait times into the U.S.
+- Canada Border Services Agency (CBSA) — wait times into Canada.
+- Ontario 511 and MDOT Mi Drive — road incidents and approach cameras.
+- U.S. National Weather Service and Environment and Climate Change Canada — weather alerts.
+- Bank of Canada — daily exchange rate for tolls.
+
+## Historical data
+The site keeps a permanent archive of every reading and shows typical wait by hour ("best times to cross") once enough history has accumulated.
+
+## Public data endpoints (JSON)
+- https://xing.report/api/now — current wait times, alerts, tolls for all crossings.
+- https://xing.report/api/patterns — typical wait by hour of day, from the archive.
