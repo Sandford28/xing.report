@@ -11,6 +11,13 @@
 <meta name="theme-color" content="#F4F4F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20width='24'%20height='24'%20fill='%230033FF'/%3E%3Cpath%20d='M5%205%20L19%2019%20M19%205%20L5%2019'%20stroke='white'%20stroke-width='4'/%3E%3C/svg%3E">
+<!-- add to home screen: a tap-to-open tile for daily glancers (phone in a cab) -->
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="xing.report">
+<meta name="mobile-web-app-capable" content="yes">
 <!-- open graph / twitter — for links shared to a dispatcher or on social -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="xing.report">
@@ -522,8 +529,36 @@ function recall(key, allowed, fallback) {
     return allowed.includes(v) ? v : fallback;
   } catch { return fallback; }
 }
-let direction = recall('xing-direction', ['to_canada', 'to_us'], 'to_canada');
-let mode = recall('xing-mode', ['truck', 'car'], 'truck');
+// a shared/bookmarked link can preset the view: ?to=windsor|detroit & v=truck|car.
+// a link wins over the last remembered choice; a first-time visitor with no
+// params keeps the clean url (we only write params once they actively toggle).
+function fromUrl() {
+  try {
+    const p = new URLSearchParams(location.search);
+    const to = p.get('to');
+    const v = p.get('v');
+    return {
+      dir: to === 'windsor' ? 'to_canada' : to === 'detroit' ? 'to_us' : null,
+      veh: v === 'truck' || v === 'car' ? v : null,
+    };
+  } catch { return { dir: null, veh: null }; }
+}
+const urlSel = fromUrl();
+let direction = urlSel.dir || recall('xing-direction', ['to_canada', 'to_us'], 'to_canada');
+let mode = urlSel.veh || recall('xing-mode', ['truck', 'car'], 'truck');
+if (urlSel.dir) remember('xing-direction', urlSel.dir);
+if (urlSel.veh) remember('xing-mode', urlSel.veh);
+
+// reflect the current view in the address bar so it's bookmarkable/shareable —
+// replaceState, so toggling never piles up browser history
+function syncUrl() {
+  try {
+    const p = new URLSearchParams(location.search);
+    p.set('to', direction === 'to_canada' ? 'windsor' : 'detroit');
+    p.set('v', mode);
+    history.replaceState(null, '', location.pathname + '?' + p.toString());
+  } catch {}
+}
 
 function lane(readings, category, type) {
   return readings.find((r) => r.direction === direction && r.lane_category === category && r.lane_type === type);
@@ -1024,6 +1059,7 @@ for (const dir of ['to_canada', 'to_us']) {
   document.getElementById('btn-' + dir).addEventListener('click', () => {
     direction = dir;
     remember('xing-direction', dir);
+    syncUrl();
     render();
   });
 }
@@ -1031,6 +1067,7 @@ for (const m of ['truck', 'car']) {
   document.getElementById('btn-' + m).addEventListener('click', () => {
     mode = m;
     remember('xing-mode', m);
+    syncUrl();
     render();
   });
 }
@@ -1047,6 +1084,12 @@ async function loadPatterns() {
   const res = await fetch('/api/patterns');
   if (res.ok) patterns = await res.json();
   render();
+}
+
+// register the service worker for installability + an offline shell (it never
+// caches /api, so live numbers are never served stale — see sw.js)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 
 // first-party, cookieless page-view beacon — fired once per load. no cookies,
