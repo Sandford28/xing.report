@@ -19,17 +19,31 @@ export const RAW_RETENTION_DAYS = 7;
 export const RAW_BODY_LIMIT = 50_000;
 export const USER_AGENT = 'xing.report data collector (mark.b.sandford@gmail.com)';
 
-export async function fetchFeed(url) {
+// A single feed can never tie up the whole invocation. Without this bound a
+// slow or hanging host holds the fetch open until Cloudflare kills the isolate
+// mid-run — taking the OTHER feeds in the same worker down with it and leaving
+// no snapshot, so the gap is silent. With it, a hang becomes a recorded fetch
+// error (the gap is explainable) and the sibling feeds still complete. Set well
+// above these feeds' normal sub-second response, well below any worker limit.
+export const FEED_TIMEOUT_MS = 20_000;
+
+export async function fetchFeed(url, timeoutMs = FEED_TIMEOUT_MS) {
   let httpStatus = null;
   let body = null;
   let error = null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { headers: { 'user-agent': USER_AGENT } });
+    const res = await fetch(url, { headers: { 'user-agent': USER_AGENT }, signal: controller.signal });
     httpStatus = res.status;
     body = await res.text();
     if (!res.ok) error = `feed returned HTTP ${res.status}`;
   } catch (e) {
-    error = String(e?.message ?? e);
+    error = controller.signal.aborted
+      ? `fetch timed out after ${timeoutMs} ms`
+      : String(e?.message ?? e);
+  } finally {
+    clearTimeout(timer);
   }
   return { httpStatus, body, error };
 }
