@@ -9,7 +9,7 @@
 
 ## Crossings
 - Ambassador Bridge (Detroit–Windsor) — trucks and cars.
-- Detroit–Windsor Tunnel — cars, plus small trucks only (under 12 ft 8 in tall, no hazmat placards).
+- Detroit–Windsor Tunnel — cars, plus low-profile trucks only (max 12 ft 8 in tall / 8 ft 6 in wide, no hazmat placards). Standard 13 ft 6 in trailers can't clear it, so it is never named the fastest freight crossing.
 - Blue Water Bridge (Port Huron–Sarnia, ~60 miles north) — shown as a diversion option.
 - Gordie Howe International Bridge — not open yet; the site tracks its status and offers one email when it opens.
 

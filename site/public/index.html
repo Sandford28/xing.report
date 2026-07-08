@@ -66,7 +66,7 @@
           "name": "Can trucks use the Detroit–Windsor Tunnel?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, but only small trucks — under 12 feet 8 inches tall and carrying no hazardous placards. Larger trucks and hazmat loads use the Ambassador Bridge or the Blue Water Bridge at Port Huron."
+            "text": "Only low-profile ones. The Tunnel takes 45- and 48-foot trailers and multi-axle flatbeds, but its clearance is just 12 feet 8 inches tall and 8 feet 6 inches wide — so a standard 13-foot-6-inch trailer, which is most freight, can't clear it. Hazmat placards are not allowed either. Standard-height and hazmat loads use the Ambassador Bridge, or the Blue Water Bridge at Port Huron. Because of the height limit, xing.report never names the tunnel the fastest freight crossing."
           }
         },
         {
@@ -251,6 +251,11 @@ header {
 .t-easing, .t-steady { font-weight: 400; color: var(--muted); }
 
 .caveat { font-size: 13px; line-height: 16px; color: var(--muted); padding: 0 16px 8px; }
+/* the tunnel's size limit is safety-critical for a trucker — never muted.
+   bold ink in a hard 4px box (ink only; color stays reserved for status). */
+.dims { margin: 0 16px 8px; border: 4px solid var(--ink); padding: 8px 10px; }
+.dims .h { font-weight: 900; font-size: 17px; line-height: 22px; font-variant-numeric: tabular-nums; }
+.dims .sub { display: block; font-weight: 400; font-size: 13px; line-height: 17px; margin-top: 2px; }
 
 /* secondary lanes: car · nexus */
 .minor { display: flex; gap: 8px; border-top: 2px solid var(--ink); }
@@ -370,6 +375,9 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
   font-size: 13px; line-height: 16px; min-height: 24px;
 }
 .src-row svg { flex: none; }
+/* source names link straight to the agency the data comes from. ink, not the
+   accent — cobalt stays unique to the wordmark; an underline carries the link. */
+.src-row a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .src-row .what { color: var(--muted); }
 .src-close { margin-top: 12px; font-size: 13px; line-height: 16px; color: var(--muted); letter-spacing: 0.08em; }
 
@@ -467,13 +475,13 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
 <footer>
   <div class="src-lead">every number on this page comes straight from the government agency that runs it, on both sides of the border — checked every 5 minutes.</div>
   <div class="src-label">sources</div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>u.s. customs and border protection <span class="what">— wait times into the u.s.</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>canada border services agency <span class="what">— wait times into canada</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>mdot mi drive <span class="what">— michigan road alerts &amp; cameras</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>ontario 511 <span class="what">— ontario road alerts &amp; cameras</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>u.s. national weather service <span class="what">— weather alerts</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>environment and climate change canada <span class="what">— weather alerts</span></div>
-  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>bank of canada <span class="what">— daily exchange rate</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg><a href="https://bwt.cbp.gov/" target="_blank" rel="noopener">u.s. customs and border protection</a> <span class="what">— wait times into the u.s.</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg><a href="https://www.cbsa-asfc.gc.ca/bwt-taf/menu-eng.html" target="_blank" rel="noopener">canada border services agency</a> <span class="what">— wait times into canada</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg><a href="https://mdotjboss.state.mi.us/MiDrive/" target="_blank" rel="noopener">mdot mi drive</a> <span class="what">— michigan road alerts &amp; cameras</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg><a href="https://511on.ca/" target="_blank" rel="noopener">ontario 511</a> <span class="what">— ontario road alerts &amp; cameras</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg><a href="https://www.weather.gov/dtx/" target="_blank" rel="noopener">u.s. national weather service</a> <span class="what">— weather alerts</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg><a href="https://weather.gc.ca/en/location/index.html?coords=42.317,-83.036" target="_blank" rel="noopener">environment and climate change canada</a> <span class="what">— weather alerts</span></div>
+  <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg><a href="https://www.bankofcanada.ca/rates/exchange/daily-exchange-rates/" target="_blank" rel="noopener">bank of canada</a> <span class="what">— daily exchange rate</span></div>
   <div class="src-close">haul safe · data from cbsa + cbp lane sensors</div>
 </footer>
 
@@ -517,9 +525,13 @@ const HERO_LANE_LABEL = { truck: 'truck wait', car: 'car wait' };
 // the two crossings a detroit–windsor driver actually chooses between
 const COMPARE_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
 const SHORT_NAME = { 'ambassador-bridge': 'ambassador', 'detroit-windsor-tunnel': 'tunnel' };
-// the tunnel takes trucks, but only small ones — say so wherever a trucker
-// might act on its number (operator faq, checked jul 2026)
-const TUNNEL_TRUCK_CAVEAT = 'small trucks only — under 12′8″ tall';
+// the tunnel's freight limit is HEIGHT, not size: it takes 45′/48′ trailers and
+// multi-axle flatbeds, but only under 12′8″ tall / 8′6″ wide — so a standard
+// 13′6″ trailer (most freight) can't clear it. safety-critical for a trucker, so
+// it's never the "fastest for freight" answer and its dimensions are shown loud.
+// (operator faq takethetunnel.com/faq, checked jul 2026)
+const TUNNEL_TRUCK_DIMS = 'max height 12′8″ · max width 8′6″';
+const TUNNEL_TRUCK_SUB = 'standard 13′6″ trailers can’t clear — flatbeds & low loads only';
 
 let data = null;
 let patterns = null; // "best time to cross" history, fetched separately from the live numbers
@@ -612,6 +624,37 @@ const SIDE_LABELS = {
 
 const DIR_ABBR = { northbound: 'nb', southbound: 'sb', eastbound: 'eb', westbound: 'wb' };
 
+// the precise stretch ("between X and Y" / "at Z") lives only in the feed's
+// free-text description — there's no structured from/to field. pull it so the
+// motorist knows WHERE, not just which road. strip 511's internal node prefix
+// (e.g. "T1-") and its trailing city (already shown as the place).
+function alertSegment(desc) {
+  if (!desc) return '';
+  // strip 511's internal node prefix (e.g. "T1-") and trailing punctuation
+  const clean = (s) => s.trim().replace(/^[A-Za-z]{1,3}\d*-/, '').replace(/\s+/g, ' ').replace(/[.,;]+\s*$/, '').toLowerCase();
+  // cut the trailing boilerplate (", City" and the "N Left Lane(s)" count) so only
+  // the place text remains — splitting on periods would break names like "E.C. Row".
+  const trim = (s) => s
+    .split(/\s+\d+\s+(?:left|right|centre|center|through|hov|express|collector)?\s*lane/i)[0]
+    .split(/,/)[0];
+  let m = desc.match(/\bbetween\s+(.+)$/i);
+  if (m) {
+    const parts = trim(m[1]).split(/\s+and\s+/i);
+    if (parts.length >= 2) return `between ${clean(parts[0])} and ${clean(parts.slice(1).join(' and '))}`;
+  }
+  // single-point events: trust "at <place>" only when it names a road-like thing
+  // and isn't a time phrase ("at night", "at 9 pm") — those would be false hits.
+  m = desc.match(/\bat\s+(.+)$/i);
+  if (m) {
+    const loc = trim(m[1]);
+    if (/\b(rd|road|ave|st|street|blvd|dr|drive|hwy|highway|line|ramp|exit|tunnel|bridge|concession|county)\b/i.test(loc)
+        && !/\b(night|nightly|noon|midnight|midday|dusk|dawn|am|pm|\d{1,2}:\d{2})\b/i.test(loc)) {
+      return `at ${clean(loc)}`;
+    }
+  }
+  return '';
+}
+
 // one strip line per card. priority: full closures first (api pre-sorts),
 // then the newest. more than one alert becomes "+ n more".
 function alertLineText(a, slug) {
@@ -621,8 +664,20 @@ function alertLineText(a, slug) {
   }
   const road = (a.roadway || '').toLowerCase();
   const dir = DIR_ABBR[(a.direction_of_travel || '').toLowerCase()] || '';
-  const what = a.is_full_closure ? 'all lanes closed'
-    : (a.lanes_affected || a.event_type || '').toLowerCase();
+  // name WHAT is happening (roadwork / incident / …) and WHICH lanes, so the
+  // strip never reads as a bare "2 left lanes" fragment. a full closure is the
+  // one thing that stands on its own.
+  const TYPE_WORD = { roadwork: 'roadwork', incident: 'incident', road_condition: 'road condition', notice: 'notice' };
+  const seg = alertSegment(a.description);
+  const lanes = (a.lanes_affected || '').toLowerCase().replace(/lane\(s\)/g, 'lanes');
+  let what;
+  if (a.is_full_closure) {
+    what = ['all lanes closed', seg].filter(Boolean).join(' ');
+  } else {
+    const type = TYPE_WORD[(a.event_type || '').toLowerCase()] || (a.event_type || '').toLowerCase();
+    const head = [type, seg].filter(Boolean).join(' ');           // "roadwork between x and y"
+    what = [head, lanes].filter(Boolean).join(' — ') || 'incident'; // "… — 2 left lanes"
+  }
   if (road) return `${road} ${dir}`.trim() + ` (${place}): ${what}`;
   return `${place}: ${(a.title || what)}`;
 }
@@ -733,6 +788,10 @@ function factsHtml(info, slug) {
 function comparable() {
   const out = [];
   for (const slug of COMPARE_POOL) {
+    // a standard-height semi can't clear the tunnel's 12′8″, so it's never the
+    // freight answer — excluded from the truck verdict/tag (still its own card,
+    // still compared normally for cars).
+    if (slug === 'detroit-windsor-tunnel' && mode === 'truck') continue;
     const c = data.crossings.find((x) => x.slug === slug);
     const r = c && modeLane(c);
     // never crown a winner on a closed lane or stale data
@@ -751,16 +810,14 @@ function fastestBoxHtml() {
   const tie = open.length > 1 && open[0].wait === open[open.length - 1].wait;
   const name = tie ? 'either crossing' : open[0].name;
   const win = open[0];
-  // the tunnel can only win for trucks if the truck fits — say so
-  const note = (!tie && win.slug === 'detroit-windsor-tunnel' && mode === 'truck')
-    ? `<div class="fastest-note">${TUNNEL_TRUCK_CAVEAT}</div>` : '';
+  // the tunnel is excluded from the freight verdict (comparable()), so the
+  // winner here is always a crossing the chosen vehicle can actually take.
   return `<div class="fastest">
     <div class="fastest-label">${label}</div>
     <div class="fastest-line">
       <div class="fastest-name">${name}</div>
       <div class="fastest-min">${noWait(win.wait)}</div>
     </div>
-    ${note}
   </div>`;
 }
 
@@ -862,7 +919,7 @@ function cardHtml(crossing, fastestSlug) {
   let hero = '';
   if (heroLane) {
     const caveat = (crossing.slug === 'detroit-windsor-tunnel' && heroKey === 'truck')
-      ? `<div class="caveat">${TUNNEL_TRUCK_CAVEAT}</div>` : '';
+      ? `<div class="dims"><span class="h">${TUNNEL_TRUCK_DIMS}</span><span class="sub">${TUNNEL_TRUCK_SUB}</span></div>` : '';
     const reported = heroLane.feed_updated_at
       ? `reported ${clock(heroLane.feed_updated_at)}`
       : `no report time given`;
