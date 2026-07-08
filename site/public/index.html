@@ -163,7 +163,10 @@ header {
 
 /* ============ the fastest box — the one-glance answer, the one acid-volt fill == */
 .fastest {
-  border: 4px solid var(--ink); background: var(--volt); color: var(--ink);
+  border: 4px solid var(--ink); background: var(--volt);
+  /* acid volt stays bright in both modes, so its text is always dark ink —
+     never var(--ink), which would flip to near-white and vanish at night */
+  color: #050505;
   padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
 }
 .fastest-label { font-size: 13px; letter-spacing: 0.08em; font-weight: 700; }
