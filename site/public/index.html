@@ -6,29 +6,32 @@
 <meta name="color-scheme" content="light dark">
 <title>xing.report — detroit–windsor border waits</title>
 <style>
-/* ============ palette — DESIGN-SPEC §1 ============ */
+/* ============ design system v2 — high-vis industrial (DESIGN-SPEC §1) ============
+   freight-first, blueprint-when-calm: when a lane is moving nothing fills, just
+   stark ink on paper. amber and red blocks appear only when a lane slows or backs
+   up. 4px ink grid, 112px/900 hero numeral, one acid-volt highlight on "fastest". */
 :root {
-  --paper: #F2F1ED;
-  --ink: #141414;
-  --hairline: #C9C7C2;
-  --muted: #6B6963;
-  --receded: #A5A29B;
-  --moving: #008A43;
-  --slow-fill: #F5A300;   --slow-text: #141414;
-  --backed-fill: #E8291C; --backed-text: #FFFFFF;
-  --accent: #0E71B8;
+  --paper: #F4F4F0;
+  --ink: #050505;
+  --cobalt: #0033FF;
+  --volt: #E1FF00;              /* the one structural highlight — the "fastest" box */
+  --muted: #7C7C74;
+  --moving: #00A355;           /* moving = green word, never a fill */
+  --slow-fill: #FFC200;   --slow-text: #050505;
+  --backed-fill: #FF2A00; --backed-text: #F4F4F0;
 }
+/* night cab — strict 1:1 inversion: paper and ink swap, the 4px grid turns white,
+   cobalt lifts, hazard fills keep their vivid punch, acid volt stays acid volt. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #121212;
-    --ink: #EDEBE6;
-    --hairline: #3A3A38;
-    --muted: #99968F;
-    --receded: #6E6C66;
-    --moving: #3FD37F;
-    --slow-fill: #FFAF1F;   --slow-text: #121212;
-    --backed-fill: #FF6047; --backed-text: #121212;
-    --accent: #4BA3DC;
+    --paper: #050505;
+    --ink: #F4F4F0;
+    --cobalt: #4D75FF;
+    --volt: #E1FF00;
+    --muted: #8C8C84;
+    --moving: #33D17A;
+    --slow-fill: #FFC200;   --slow-text: #050505;
+    --backed-fill: #FF2A00; --backed-text: #F4F4F0;
   }
 }
 
@@ -40,171 +43,187 @@ body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 20px;
-  text-transform: lowercase; /* everything lowercase, no exceptions */
+  text-transform: lowercase; /* lowercase everywhere except emergency alert banners */
 }
-main { max-width: 480px; margin: 0 auto; padding: 16px; }
+main { max-width: 440px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+a { color: var(--cobalt); }
 
-/* ============ wordmark — §4 ============ */
+/* ============ wordmark + global freshness — §4 ============ */
 header {
-  border-bottom: 2px solid var(--ink);
+  max-width: 440px; margin: 0 auto;
   padding: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .wordmark {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 20px; font-weight: 700;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 24px; font-weight: 900;
 }
 .wordmark svg { display: block; }
-.wordmark .tld { font-weight: 400; color: var(--accent); } /* the accent — once, here, nowhere else */
+.wordmark .tld { font-weight: 400; color: var(--cobalt); }
+.checked { font-size: 13px; color: var(--muted); white-space: nowrap; }
 
 /* ============ stale warning strip — §5 ============ */
 #stale {
   display: none;
+  max-width: 440px; margin: 0 auto;
   background: var(--slow-fill); color: var(--slow-text);
   font-weight: 700; padding: 16px;
 }
 #stale.show { display: block; }
 
-/* ============ the verdict — the answer, in display type ============ */
-.verdict { font-size: 28px; line-height: 34px; font-weight: 700; padding-bottom: 16px; }
-.verdict .caveat-inline { font-weight: 400; font-size: 18px; color: var(--muted); }
-.verdict svg { vertical-align: -1px; }
+/* ============ the fastest box — the one-glance answer, the one acid-volt fill == */
+.fastest {
+  border: 4px solid var(--ink); background: var(--volt); color: var(--ink);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+}
+.fastest-label { font-size: 13px; letter-spacing: 0.08em; font-weight: 700; }
+.fastest-line { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.fastest-name { font-size: 28px; font-weight: 900; line-height: 30px; }
+.fastest-min {
+  font-size: 28px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.fastest-min .unit { font-size: 15px; font-weight: 400; }
+.fastest-note { font-size: 13px; font-weight: 400; line-height: 17px; }
 
-/* ============ toggles: direction + vehicle, side by side ============ */
-.toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+/* ============ toggles: direction + vehicle — 64px, glove-sized ============ */
 .toggle {
   display: grid; grid-template-columns: 1fr 1fr;
-  border: 2px solid var(--ink);
+  border: 4px solid var(--ink);
 }
 .toggle button {
-  height: 56px;
-  font: 700 15px/16px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  height: 60px;
+  font: 900 16px/18px "Helvetica Neue", Helvetica, Arial, sans-serif;
   text-transform: lowercase;
   background: none; color: var(--ink);
   border: none; cursor: pointer;
 }
-.toggle button:first-child { border-right: 2px solid var(--ink); }
+.toggle button:first-child { border-right: 4px solid var(--ink); }
 .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-
-/* ============ the comparison board — one signboard, fastest first ============ */
-.board { border: 2px solid var(--ink); margin-bottom: 24px; }
-.board-row { padding: 16px; }
-.board-row + .board-row { border-top: 2px solid var(--ink); }
-.board-name { font-size: 18px; line-height: 24px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.tag-fastest {
-  font-size: 13px; line-height: 16px; font-weight: 700;
-  background: var(--ink); color: var(--paper); padding: 2px 8px;
-}
-.board-line { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.board .numeral { font-size: 72px; line-height: 72px; }
-.board-fresh { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
-.board-alert {
-  background: var(--slow-fill); color: var(--slow-text); font-weight: 700;
-  padding: 8px 12px; margin-top: 8px; line-height: 20px;
-}
-.board-alert.alert-closure { background: var(--backed-fill); color: var(--backed-text); }
-.caveat { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
 
 .section-label {
   font-size: 13px; line-height: 16px; letter-spacing: 0.08em;
-  color: var(--muted); margin-bottom: 8px;
+  color: var(--muted);
 }
 
-/* ============ crossing card ============ */
-.card { border: 2px solid var(--ink); padding: 24px; margin-bottom: 16px; }
-.bridge { font-size: 28px; line-height: 32px; font-weight: 700; margin-bottom: 16px; }
+/* ============ crossing card — the comparison lives here, fastest first ======= */
+.card { border: 4px solid var(--ink); background: var(--paper); }
+.card-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px;
+}
+.card-name {
+  font-size: 24px; font-weight: 900; line-height: 26px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.tag-fastest {
+  font-size: 12px; line-height: 14px; font-weight: 900; letter-spacing: 0.04em;
+  background: var(--ink); color: var(--paper); padding: 4px 8px;
+}
 /* where a crossing is, when it isn't obvious (blue water) */
-.place { color: var(--muted); margin: -12px 0 16px; }
+.place { color: var(--muted); padding: 0 16px 8px; }
 
 .lane-label {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; line-height: 16px; font-weight: 400;
-  letter-spacing: 0.08em; color: var(--muted);
+  display: flex; align-items: center; gap: 8px; padding: 0 16px;
+  font-size: 13px; line-height: 16px; letter-spacing: 0.08em; color: var(--ink);
 }
 .lane-label svg { color: var(--ink); }
 
 /* the hero numeral — nothing renders larger (§2, §5) */
-.hero-row { display: flex; align-items: baseline; gap: 16px; margin: 8px 0; flex-wrap: wrap; }
-.numeral {
-  font-size: 96px; line-height: 91px; font-weight: 700;
-  font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap;
+.hero {
+  padding: 0 16px 4px;
+  font-size: 112px; line-height: 100px; font-weight: 900;
+  letter-spacing: -0.04em; font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.unit { font-size: 16px; font-weight: 400; color: var(--muted); }
+.hero .unit { font-size: 22px; font-weight: 400; letter-spacing: 0; }
+@media (max-width: 400px) { .hero { font-size: 92px; line-height: 84px; } }
+
+.hero-sub {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 4px 16px 14px;
+}
+.hero-sub .sub { font-size: 15px; color: var(--muted); }
 
 /* signal field — always contains its word (§1) */
-.signal { font-size: 20px; padding: 8px 16px; }
-.s-moving { color: var(--moving); font-weight: 400; padding: 8px 0; } /* calm is quiet: no fill */
-.s-slow { background: var(--slow-fill); color: var(--slow-text); font-weight: 700; }
-.s-backed { background: var(--backed-fill); color: var(--backed-text); font-weight: 700; }
-.s-closed { background: var(--ink); color: var(--paper); font-weight: 700; }
-.signal-minor { font-size: 15px; padding: 4px 8px; }
+.signal { font-size: 16px; font-weight: 900; padding: 8px 14px; letter-spacing: -0.01em; white-space: nowrap; }
+.s-moving { color: var(--moving); padding: 8px 0; background: none; }   /* calm is quiet: no fill */
+.s-slow { background: var(--slow-fill); color: var(--slow-text); }
+.s-backed { background: var(--backed-fill); color: var(--backed-text); }
+.s-closed { background: var(--ink); color: var(--paper); }
+.signal-minor { font-size: 14px; padding: 4px 10px; }
 .signal-minor.s-moving { padding: 4px 0; }
 
-/* trend — one word, always (§5). readable at arm's length, not fine print. */
-.trend { font-size: 18px; line-height: 20px; }
-.t-climbing { font-weight: 700; color: var(--ink); }
+/* trend — one word, always (§5) */
+.trend { font-size: 15px; line-height: 18px; white-space: nowrap; }
+.t-climbing { font-weight: 900; color: var(--ink); }
 .t-easing, .t-steady { font-weight: 400; color: var(--muted); }
 
-/* secondary lanes: car · nexus (§2 nexus numeral) */
-.minor { display: flex; gap: 24px; flex-wrap: wrap; }
-.minor > div { flex: 1; min-width: 120px; }
-.minor .numeral { font-size: 40px; line-height: 40px; letter-spacing: 0; }
-.minor .hero-row { gap: 8px; }
-.minor .trend { font-size: 15px; }
+.caveat { font-size: 13px; line-height: 16px; color: var(--muted); padding: 0 16px 8px; }
 
-.rule { border: none; border-top: 1px solid var(--hairline); margin: 16px 0; }
+/* secondary lanes: car · nexus */
+.minor { display: flex; gap: 8px; border-top: 2px solid var(--ink); }
+.minor > div { flex: 1; padding: 12px 16px; }
+.minor > div + div { border-left: 2px solid var(--ink); }
+.minor .lane-label { padding: 0 0 6px; }
+.minor .numeral { font-size: 40px; line-height: 40px; font-weight: 900; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.minor .numeral .unit { font-size: 14px; font-weight: 400; letter-spacing: 0; color: var(--muted); }
+.minor .minor-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.minor .trend { margin-top: 4px; }
 
-/* alert strip — one line per card (§5). amber = lanes affected, red = full
-   closure: incidents wear a signal color, never neutral ink. without: recedes. */
+/* the two clocks — plain language, told apart by wording */
+.fresh { color: var(--muted); font-size: 13px; line-height: 16px; padding: 12px 16px; border-top: 2px solid var(--ink); }
+
+/* alert strip — one row per card (§5). amber = lanes affected, red = full closure:
+   incidents wear a signal color, never neutral ink. uppercase, on the grid. */
 .alert-line {
-  background: var(--slow-fill); color: var(--slow-text); font-weight: 700;
-  padding: 8px 16px; margin-bottom: 16px; line-height: 20px;
+  border-top: 2px solid var(--ink);
+  background: var(--slow-fill); color: var(--slow-text); font-weight: 900;
+  padding: 12px 16px; line-height: 18px;
+  font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
 }
 .alert-line.alert-closure { background: var(--backed-fill); color: var(--backed-text); }
 .alert-none {
-  color: var(--receded); font-weight: 400; margin-bottom: 16px;
+  border-top: 2px solid var(--ink);
+  color: var(--muted); padding: 12px 16px; font-size: 13px; letter-spacing: 0.08em;
 }
 
-/* the two clocks — plain language, told apart by wording */
-.fresh { color: var(--muted); }
-
-/* reference facts fold away behind one glove-sized tap (§3) — the live
-   screen stays calm; tolls are planning info, not glancing info */
-.more { border-top: 1px solid var(--hairline); margin-top: 16px; }
+/* reference facts / chart / camera fold away behind one glove-sized tap (§3) */
+.more { border-top: 2px solid var(--ink); }
 .more summary {
-  min-height: 56px; display: flex; align-items: center; justify-content: space-between;
+  min-height: 56px; padding: 0 16px;
+  display: flex; align-items: center; justify-content: space-between;
   font-weight: 700; cursor: pointer; list-style: none;
 }
 .more summary::-webkit-details-marker { display: none; }
-.more summary::after { content: '+'; font-size: 20px; font-weight: 400; color: var(--muted); }
+.more summary::after { content: '+'; font-size: 24px; font-weight: 400; color: var(--muted); }
 .more[open] summary::after { content: '−'; }
 
-/* a whole crossing folded to one row — blue water (a 60-mile diversion,
-   not part of the detroit–windsor choice) and gordie howe (not open yet) */
-details.fold { border: 2px solid var(--ink); margin-bottom: 16px; }
+/* a whole crossing folded to one row — blue water + gordie howe */
+details.fold { border: 4px solid var(--ink); }
 .fold > summary {
-  min-height: 56px; padding: 16px;
+  min-height: 60px; padding: 16px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   cursor: pointer; list-style: none;
 }
 .fold > summary::-webkit-details-marker { display: none; }
-.fold > summary::after { content: '+'; font-size: 24px; font-weight: 400; color: var(--muted); flex: none; }
+.fold > summary::after { content: '+'; font-size: 28px; font-weight: 400; color: var(--muted); flex: none; }
 .fold[open] > summary::after { content: '−'; }
 .fold .fold-title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.fold .fold-name { font-weight: 700; font-size: 18px; line-height: 24px; }
+.fold .fold-name { font-weight: 900; font-size: 20px; line-height: 24px; }
 .fold .fold-info { color: var(--muted); }
-.fold .fold-body { padding: 0 24px 24px; }
+.fold .fold-body { padding: 0 16px 16px; }
+/* a full crossing card nested in a fold — pull it flush so its rows align
+   with the top-level cards (the rows carry their own 16px inset) */
+.fold .fold-body .fold-card { margin: 0 -16px -16px; }
 
-/* hand-maintained facts: tolls, hazmat — read at arm's length: the answer
-   is bold on its own line, details are short lines, phone numbers become
-   glove-sized call buttons */
-.facts { font-size: 17px; line-height: 24px; padding-bottom: 16px; }
+/* hand-maintained facts: tolls, hazmat */
+.facts { font-size: 17px; line-height: 24px; padding: 0 16px 16px; }
 .facts .label {
   font-size: 13px; line-height: 16px; letter-spacing: 0.08em;
   color: var(--muted); margin-bottom: 8px;
 }
 .facts .label:not(:first-child) { margin-top: 20px; }
 .facts .as-of { font-size: 13px; line-height: 16px; margin-top: 4px; }
-.facts .unverified { color: var(--receded); }
+.facts .unverified { color: var(--muted); }
 .fact-main { font-weight: 700; }
 .toll-row {
   display: flex; justify-content: space-between; align-items: baseline;
@@ -214,27 +233,28 @@ details.fold { border: 2px solid var(--ink); margin-bottom: 16px; }
 .call {
   display: flex; align-items: center; justify-content: center;
   min-height: 56px; margin-top: 8px;
-  border: 2px solid var(--ink); color: var(--ink);
-  font-weight: 700; text-decoration: none;
+  border: 4px solid var(--ink); color: var(--ink);
+  font-weight: 900; text-decoration: none;
 }
+.rule { border: none; border-top: 2px solid var(--ink); margin: 16px 0; }
 
 /* gordie howe status */
-.status-headline { font-size: 28px; line-height: 32px; font-weight: 700; margin: 16px 0 8px; }
+.status-headline { font-size: 24px; line-height: 28px; font-weight: 900; margin: 0 0 8px; }
 .status-note { margin-bottom: 8px; }
 .as-of { font-size: 13px; line-height: 16px; color: var(--muted); }
 
 /* email signup — glove-sized targets, hard edges */
-.signup { margin-top: 16px; }
+.signup { margin-top: 8px; }
 .signup input[type="email"] {
   display: block; width: 100%; height: 56px; padding: 0 16px;
   font: 400 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: var(--ink); background: var(--paper);
-  border: 2px solid var(--ink); border-radius: 0;
+  border: 4px solid var(--ink); border-radius: 0;
   margin-bottom: 8px;
 }
 .signup button {
   display: block; width: 100%; height: 56px;
-  font: 700 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 900 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
   text-transform: lowercase;
   color: var(--paper); background: var(--ink);
   border: none; border-radius: 0; cursor: pointer;
@@ -243,9 +263,9 @@ details.fold { border: 2px solid var(--ink); margin-bottom: 16px; }
 .signup-msg { margin-top: 8px; }
 
 /* ============ sources — provenance is the product's authority ============ */
-footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
+footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
 .src-lead {
-  border-top: 2px solid var(--ink); padding-top: 16px; margin-bottom: 12px;
+  border-top: 4px solid var(--ink); padding-top: 16px; margin-bottom: 12px;
   font-size: 15px; line-height: 20px;
 }
 .src-label {
@@ -258,37 +278,31 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
 }
 .src-row svg { flex: none; }
 .src-row .what { color: var(--muted); }
-.src-close { margin-top: 12px; font-size: 13px; line-height: 16px; color: var(--muted); }
+.src-close { margin-top: 12px; font-size: 13px; line-height: 16px; color: var(--muted); letter-spacing: 0.08em; }
 
 /* ============ "best time to cross" chart — §6 ============
-   bars in ink only (signal colors never fill data), 2px ink baseline,
-   sparse hour ticks, two word-paired callouts. lives behind a tap so the
-   glance screen stays calm; only drawn once the archive is deep enough. */
-.chart { padding-top: 8px; }
+   bars in ink only (signal colors never fill data), 2px ink baseline. */
+.chart { padding: 8px 16px 16px; }
 .chart-bars {
   display: flex; align-items: flex-end; gap: 4px;
   height: 96px; border-bottom: 2px solid var(--ink);
 }
 .chart-bars > div { flex: 1; background: var(--ink); min-height: 2px; }
-.chart-bars > div.empty { background: none; } /* an hour with no history reads as a gap, not a zero */
+.chart-bars > div.empty { background: none; }
 .chart-ticks {
   display: flex; justify-content: space-between;
   font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px;
 }
 .chart-callout { font-size: 15px; line-height: 20px; margin-top: 8px; }
-.chart-callout .quiet { color: var(--moving); }    /* quiet-green, always with its word */
-.chart-callout .busy { font-weight: 700; }
+.chart-callout .quiet { color: var(--moving); }
+.chart-callout .busy { font-weight: 900; }
 .chart-basis { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
-/* the honest pre-chart state — one calm muted line, no fold */
-.chart-gathering { color: var(--muted); margin-top: 16px; }
+.chart-gathering { color: var(--muted); border-top: 2px solid var(--ink); padding: 12px 16px; }
 
-/* ============ approach camera — behind a tap, like the chart ============
-   a photo is the busiest thing on a calm page, so it only appears when asked
-   for. one image, for the direction you chose, loaded straight from the
-   agency (we never store it). a down camera says so — never a broken image. */
-.cam { padding-top: 8px; }
+/* ============ approach camera — behind a tap, like the chart ============ */
+.cam { padding: 8px 16px 16px; }
 .cam-frame {
-  border: 1px solid var(--hairline); background: var(--hairline);
+  border: 2px solid var(--ink); background: var(--ink);
   min-height: 120px; display: flex; align-items: center; justify-content: center;
 }
 .cam-img { display: block; width: 100%; height: auto; }
@@ -301,33 +315,27 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
 <header>
   <span class="wordmark">
     <!-- ✕ mark: two crossed bars at ±45° (§4) -->
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <g fill="currentColor">
-        <rect x="1" y="8.5" width="22" height="7" transform="rotate(45 12 12)"/>
-        <rect x="1" y="8.5" width="22" height="7" transform="rotate(-45 12 12)"/>
-      </g>
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 4 L20 20 M20 4 L4 20" stroke="currentColor" stroke-width="5"/>
     </svg>
     xing<span class="tld">.report</span>
   </span>
+  <span class="checked" id="checked"></span>
 </header>
 
 <div id="stale"></div>
 
 <main>
-  <div id="verdict"></div>
-  <div class="toggles">
-    <nav class="toggle" aria-label="direction">
-      <button id="btn-to_canada" aria-pressed="true">to windsor</button>
-      <button id="btn-to_us" aria-pressed="false">to detroit</button>
-    </nav>
-    <nav class="toggle" aria-label="vehicle">
-      <button id="btn-truck" aria-pressed="true">truck</button>
-      <button id="btn-car" aria-pressed="false">car</button>
-    </nav>
-  </div>
-  <div id="board"><div class="fresh">loading…</div></div>
-  <div class="section-label">details</div>
-  <div id="cards"></div>
+  <div id="fastest"></div>
+  <nav class="toggle" aria-label="direction">
+    <button id="btn-to_canada" aria-pressed="true">det &#8594; win</button>
+    <button id="btn-to_us" aria-pressed="false">win &#8594; det</button>
+  </nav>
+  <nav class="toggle" aria-label="vehicle">
+    <button id="btn-truck" aria-pressed="true">truck</button>
+    <button id="btn-car" aria-pressed="false">car</button>
+  </nav>
+  <div id="cards"><div class="fresh">loading…</div></div>
   <!-- rendered once, outside the 30s re-render, so typing in the signup
        form is never wiped by a refresh -->
   <div id="gordie"></div>
@@ -363,7 +371,7 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>u.s. national weather service <span class="what">— weather alerts</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>environment and climate change canada <span class="what">— weather alerts</span></div>
   <div class="src-row"><svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>bank of canada <span class="what">— daily exchange rate</span></div>
-  <div class="src-close">safe travels.</div>
+  <div class="src-close">haul safe · data from cbsa + cbp lane sensors</div>
 </footer>
 
 <script>
@@ -371,9 +379,9 @@ footer { max-width: 480px; margin: 0 auto; padding: 0 16px 24px; }
 
 // ---- pictograms — §3: 48×30, 2.5 stroke, no fill, currentColor ----
 const PICTO = {
-  truck: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="6" width="26" height="15"/><path d="M28 11 h9 l7 7 v3 h-16 z"/><circle cx="11" cy="25" r="3"/><circle cx="37" cy="25" r="3"/></svg>',
-  car: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 22 v-4 l7 -2 5 -6 h11 l6 6 h9 v6"/><circle cx="14" cy="24" r="3"/><circle cx="35" cy="24" r="3"/></svg>',
-  nexus: '<svg width="48" height="30" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M24 3 L38 15 L24 27 L10 15 Z"/></svg>',
+  truck: '<svg width="44" height="28" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="5" width="24" height="14"/><path d="M26 9 h10 l8 6 v4 h-18"/><circle cx="11" cy="24" r="3.5"/><circle cx="37" cy="24" r="3.5"/></svg>',
+  car: '<svg width="44" height="28" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 22 v-4 l7 -2 5 -6 h11 l6 6 h9 v6"/><circle cx="14" cy="24" r="3"/><circle cx="35" cy="24" r="3"/></svg>',
+  nexus: '<svg width="44" height="28" viewBox="0 0 48 30" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M24 3 L38 15 L24 27 L10 15 Z"/></svg>',
 };
 
 // ---- status thresholds — §5: a 30-minute wait is routine for a truck
@@ -400,6 +408,8 @@ const TREND_MARK = { climbing: '▲', easing: '▼', steady: '—' };
 
 // lane names in plain language — "nexus" means nothing to a first-timer
 const LANE_LABEL = { truck: 'truck', car: 'car', nexus: 'nexus (trusted traveler)' };
+// the lane label under the hero reads as a wait, freight-first
+const HERO_LANE_LABEL = { truck: 'truck wait', car: 'car wait' };
 
 // the two crossings a detroit–windsor driver actually chooses between
 const COMPARE_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
@@ -443,12 +453,12 @@ function clock(iso) {
 
 function trendHtml(r) {
   if (!r || !r.trend) return '';
-  return `<div class="trend t-${r.trend}">${TREND_MARK[r.trend]} ${r.trend}</div>`;
+  return `<span class="trend t-${r.trend}">${TREND_MARK[r.trend]} ${r.trend}</span>`;
 }
 
-function numeralHtml(r) {
-  if (r.wait_minutes === null) return `<span class="numeral">–</span>`;
-  return `<span class="numeral">${r.wait_minutes}</span><span class="unit">min</span>`;
+function numeralHtml(r, cls) {
+  if (r.wait_minutes === null) return `<span class="${cls}">–</span>`;
+  return `<span class="${cls}">${r.wait_minutes}<span class="unit"> min</span></span>`;
 }
 
 // every lane wears its word, secondary lanes included — color never stands alone
@@ -457,7 +467,7 @@ function minorLaneHtml(r, picto, label) {
   const s = signalOf(r);
   return `<div>
     <div class="lane-label">${PICTO[picto]}${label}</div>
-    <div class="hero-row">${numeralHtml(r)}<span class="signal signal-minor ${s.cls}">${s.word}</span></div>
+    <div class="minor-line">${numeralHtml(r, 'numeral')}<span class="signal signal-minor ${s.cls}">${s.word}</span></div>
     ${trendHtml(r)}
   </div>`;
 }
@@ -491,8 +501,9 @@ function alertsCurrent() {
   return checked !== null && checked <= 15;
 }
 
-function alertStripHtml(crossing) {
-  // never claim "no incidents" unless our alert collection is actually current
+// the alert row that sits on the card's grid — amber for lanes, red for a
+// closure, a quiet recede line when there's nothing (or we can't check).
+function alertRowHtml(crossing) {
   if (!alertsCurrent()) {
     return `<div class="alert-none">we can't check road incidents right now</div>`;
   }
@@ -501,19 +512,6 @@ function alertStripHtml(crossing) {
   const more = alerts.length > 1 ? ` +${alerts.length - 1} more` : '';
   const cls = alerts[0].is_full_closure ? 'alert-line alert-closure' : 'alert-line';
   return `<div class="${cls}">${alertLineText(alerts[0], crossing.slug)}${more}</div>`;
-}
-
-// the two clocks, told apart in plain words, on one quiet line:
-// how old the border's own reading is · when WE last checked.
-function freshHtml(readings, heroCategory) {
-  const src = readings.find((r) => r.lane_category === heroCategory && r.lane_type === 'standard' && r.direction === direction)
-           || readings.find((r) => r.direction === direction);
-  if (!src) return '';
-  const reported = src.feed_updated_at
-    ? `border reported this at ${clock(src.feed_updated_at)}`
-    : `border gave no time for this reading`;
-  const checked = minsAgo(src.fetched_at);
-  return `<div class="fresh">${reported} · we checked ${checked === 0 ? 'just now' : `${checked} min ago`}</div>`;
 }
 
 function money(n) {
@@ -599,7 +597,7 @@ function factsHtml(info, slug) {
   </details>`;
 }
 
-/* ============ the verdict — names the winner for your vehicle ============ */
+/* ============ the fastest box — names the winner for your vehicle ============ */
 
 function comparable() {
   const out = [];
@@ -614,76 +612,25 @@ function comparable() {
   return out;
 }
 
-// the destination wears its country's flag — mono ink, defined in <defs>
-const FLAG = {
-  to_canada: '<svg width="22" height="14" viewBox="0 0 22 14" aria-label="canada"><use href="#flag-ca"/></svg>',
-  to_us: '<svg width="22" height="14" viewBox="0 0 22 14" aria-label="united states"><use href="#flag-us"/></svg>',
-};
-
-function verdictHtml() {
-  const dest = `${direction === 'to_canada' ? 'windsor' : 'detroit'} ${FLAG[direction]}`;
-  const who = mode === 'truck' ? 'trucks' : 'cars';
+function fastestBoxHtml() {
   const open = comparable();
   if (!open.length) return '';
-  const noWait = (w) => (w === 0 ? 'no wait' : `${w} min`);
-  // the tunnel can win for trucks only if the truck fits — the verdict says so
-  const tunnelNote = (slug) => (slug === 'detroit-windsor-tunnel' && mode === 'truck')
-    ? ` <span class="caveat-inline">(${TUNNEL_TRUCK_CAVEAT})</span>` : '';
-  if (open.length === 1) {
-    return `<div class="verdict">to ${dest} for ${who}: ${open[0].name} — ${noWait(open[0].wait)}${tunnelNote(open[0].slug)}</div>`;
-  }
-  if (open[0].wait === open[open.length - 1].wait) {
-    return `<div class="verdict">either crossing to ${dest} — ${noWait(open[0].wait)} for ${who}</div>`;
-  }
-  return `<div class="verdict">take the ${open[0].name} to ${dest} — ${noWait(open[0].wait)} vs ${open[1].wait} min for ${who}${tunnelNote(open[0].slug)}</div>`;
-}
-
-/* ============ the comparison board — the one-glance screen ============ */
-
-function boardRowHtml(crossing, fastestSlug) {
-  const r = modeLane(crossing);
-  const name = crossing.name;
-  if (!r) {
-    return `<div class="board-row">
-      <div class="board-name">${name}</div>
-      <div class="fresh">no live ${mode} wait reported here</div>
-    </div>`;
-  }
-  const s = signalOf(r);
-  const tag = crossing.slug === fastestSlug ? `<span class="tag-fastest">fastest</span>` : '';
-  const caveat = (crossing.slug === 'detroit-windsor-tunnel' && mode === 'truck')
-    ? `<div class="caveat">${TUNNEL_TRUCK_CAVEAT}</div>` : '';
-  const alerts = alertsCurrent() ? (crossing.alerts || []) : [];
-  const alertHtml = alerts.length
-    ? `<div class="board-alert${alerts[0].is_full_closure ? ' alert-closure' : ''}">${alertLineText(alerts[0], crossing.slug)}${alerts.length > 1 ? ` +${alerts.length - 1} more` : ''}</div>`
-    : '';
-  const checked = minsAgo(r.fetched_at);
-  return `<div class="board-row">
-    <div class="board-name">${name} ${tag}</div>
-    <div class="board-line">
-      ${numeralHtml(r)}
-      <span class="signal ${s.cls}">${s.word}</span>
-      ${trendHtml(r)}
+  const label = mode === 'truck' ? 'fastest for freight right now' : 'fastest for cars right now';
+  const noWait = (w) => (w === 0 ? 'no wait' : `${w}<span class="unit"> min</span>`);
+  const tie = open.length > 1 && open[0].wait === open[open.length - 1].wait;
+  const name = tie ? 'either crossing' : open[0].name;
+  const win = open[0];
+  // the tunnel can only win for trucks if the truck fits — say so
+  const note = (!tie && win.slug === 'detroit-windsor-tunnel' && mode === 'truck')
+    ? `<div class="fastest-note">${TUNNEL_TRUCK_CAVEAT}</div>` : '';
+  return `<div class="fastest">
+    <div class="fastest-label">${label}</div>
+    <div class="fastest-line">
+      <div class="fastest-name">${name}</div>
+      <div class="fastest-min">${noWait(win.wait)}</div>
     </div>
-    ${caveat}
-    ${alertHtml}
-    <div class="board-fresh">checked ${checked === 0 ? 'just now' : `${checked} min ago`}</div>
+    ${note}
   </div>`;
-}
-
-function boardHtml() {
-  const open = comparable();
-  // a strict winner gets the tag; a tie or a lone open crossing gets none
-  const fastestSlug = (open.length > 1 && open[0].wait < open[1].wait) ? open[0].slug : null;
-  // fastest first; crossings without a live number sink to the bottom
-  const rank = new Map(open.map((o, i) => [o.slug, i]));
-  const rows = COMPARE_POOL
-    .map((slug) => data.crossings.find((c) => c.slug === slug))
-    .filter(Boolean)
-    .sort((a, b) => (rank.has(a.slug) ? rank.get(a.slug) : 99) - (rank.has(b.slug) ? rank.get(b.slug) : 99))
-    .map((c) => boardRowHtml(c, fastestSlug))
-    .join('');
-  return rows ? `<div class="board">${rows}</div>` : '<div class="fresh">no data available</div>';
 }
 
 /* ============ "best time to cross" — the tool only our archive can build ==== */
@@ -703,8 +650,7 @@ function bestTimesHtml(slug) {
   if (!patterns.ready) {
     const d = patterns.history.days;
     const left = Math.max(1, patterns.min_days - d);
-    return `<hr class="rule">
-      <div class="chart-gathering">best times to cross — gathering data. a full week builds a reliable pattern; about ${left} ${left === 1 ? 'day' : 'days'} to go.</div>`;
+    return `<div class="chart-gathering">best times to cross — gathering data. a full week builds a reliable pattern; about ${left} ${left === 1 ? 'day' : 'days'} to go.</div>`;
   }
   const series = ((patterns.crossings[slug] || {})[direction] || {})[mode];
   const withData = (series || []).filter((p) => p.wait !== null && p.n > 0);
@@ -717,7 +663,7 @@ function bestTimesHtml(slug) {
     return `<div style="height:${Math.max(pct, 2)}%"></div>`;
   }).join('');
 
-  // callouts pair color with words, always. quietest in quiet-green, busiest in ink 700.
+  // callouts pair color with words, always. quietest in quiet-green, busiest in ink 900.
   const quiet = withData.reduce((a, b) => (b.wait < a.wait ? b : a));
   const busy = withData.reduce((a, b) => (b.wait > a.wait ? b : a));
   const mins = (w) => (w === 0 ? 'no wait' : `${w} min`);
@@ -762,9 +708,9 @@ function cameraHtml(crossing) {
   </details>`;
 }
 
-/* ============ detail cards — for when you're parked ============ */
+/* ============ crossing card — the comparison + the detail, in one ============ */
 
-function cardHtml(crossing) {
+function cardHtml(crossing, fastestSlug) {
   const lanes = {
     truck: lane(crossing.readings, 'commercial', 'standard'),
     car: lane(crossing.readings, 'passenger', 'standard'),
@@ -777,35 +723,37 @@ function cardHtml(crossing) {
   const heroKey = lanes[mode] ? mode : (mode === 'truck' ? 'car' : 'truck');
   const heroLane = lanes[heroKey];
 
+  const s = heroLane ? signalOf(heroLane) : null;
+  const tag = crossing.slug === fastestSlug ? `<span class="tag-fastest">fastest</span>` : '';
+  const place = crossing.info && crossing.info.place
+    ? `<div class="place">${crossing.info.place}</div>` : '';
+
   let hero = '';
   if (heroLane) {
-    const s = signalOf(heroLane);
     const caveat = (crossing.slug === 'detroit-windsor-tunnel' && heroKey === 'truck')
       ? `<div class="caveat">${TUNNEL_TRUCK_CAVEAT}</div>` : '';
+    const reported = heroLane.feed_updated_at
+      ? `reported ${clock(heroLane.feed_updated_at)}`
+      : `no report time given`;
     hero = `
-      <div class="lane-label">${PICTO[heroKey]}${heroKey}</div>
-      <div class="hero-row">
-        ${numeralHtml(heroLane)}
-        <span class="signal ${s.cls}">${s.word}</span>
-      </div>
-      ${trendHtml(heroLane)}
+      <div class="lane-label">${PICTO[heroKey]}${HERO_LANE_LABEL[heroKey] || heroKey}</div>
+      <div class="hero">${heroLane.wait_minutes === null ? '–' : `${heroLane.wait_minutes}<span class="unit"> min</span>`}</div>
       ${caveat}
-      <hr class="rule">`;
+      <div class="hero-sub"><span class="sub">${reported}</span>${trendHtml(heroLane)}</div>`;
   }
 
   const minorKeys = heroKey === 'car' ? ['nexus', 'truck'] : ['car', 'nexus'];
   const minors = minorKeys.map((k) => minorLaneHtml(lanes[k], k, LANE_LABEL[k])).filter(Boolean).join('');
 
-  const place = crossing.info && crossing.info.place
-    ? `<div class="place">${crossing.info.place}</div>` : '';
-
   return `<section class="card">
-    <h2 class="bridge">${crossing.name}</h2>
+    <div class="card-head">
+      <h2 class="card-name">${crossing.name} ${tag}</h2>
+      ${s ? `<span class="signal ${s.cls}">${s.word}</span>` : ''}
+    </div>
     ${place}
-    ${alertStripHtml(crossing)}
     ${hero}
-    ${minors ? `<div class="minor">${minors}</div><hr class="rule">` : ''}
-    ${freshHtml(crossing.readings, heroKey === 'car' ? 'passenger' : 'commercial')}
+    ${minors ? `<div class="minor">${minors}</div>` : ''}
+    ${alertRowHtml(crossing)}
     ${cameraHtml(crossing)}
     ${bestTimesHtml(crossing.slug)}
     ${factsHtml(crossing.info, crossing.slug)}
@@ -826,12 +774,11 @@ function blueWaterFoldHtml() {
       ? s.word
       : `${mode} ${r.wait_minutes} min <span class="signal-minor ${s.cls}" style="padding:0">${s.word}</span>`;
   }
-  // an active incident shows through the fold — never hidden behind a tap
-  const alerts = alertsCurrent() ? (c.alerts || []) : [];
-  const alertHtml = alerts.length
-    ? `<div class="board-alert${alerts[0].is_full_closure ? ' alert-closure' : ''}" style="margin:0 16px 16px">${alertLineText(alerts[0], c.slug)}${alerts.length > 1 ? ` +${alerts.length - 1} more` : ''}</div>`
-    : '';
-  const body = cardHtml(c).replace('<section class="card">', '<div>').replace(/<\/section>$/, '</div>');
+  // the incident rides on the summary's "backed up" word when collapsed, and
+  // the card body's own alert row carries the detail when opened — one copy.
+  // the card rows already inset 16px; cancel the fold-body's own 16px so blue
+  // water's content lines up with the top-level cards instead of double-indenting
+  const body = cardHtml(c, null).replace('<section class="card">', '<div class="fold-card">').replace(/<\/section>$/, '</div>');
   return `<details class="fold" data-slug="blue-water-fold">
     <summary>
       <span class="fold-title">
@@ -840,7 +787,6 @@ function blueWaterFoldHtml() {
         <span class="fold-info">60 miles north, at port huron</span>
       </span>
     </summary>
-    ${alertHtml}
     <div class="fold-body">${body}</div>
   </details>`;
 }
@@ -860,10 +806,10 @@ function gordieFoldHtml(g) {
       <div class="status-note">${g.status.note}</div>
       <div class="as-of">as of ${shortDate(g.status.as_of)}</div>
       <hr class="rule">
-      <div class="facts">${hazmatLine(g.hazmat)}</div>
+      <div class="facts" style="padding:0">${hazmatLine(g.hazmat)}</div>
       <hr class="rule">
       <form class="signup" id="signup">
-        <div class="facts" style="margin-bottom:8px">get one email when the bridge opens. nothing else.</div>
+        <div class="facts" style="padding:0 0 8px">get one email when the bridge opens. nothing else.</div>
         <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
         <input type="email" name="email" placeholder="you@example.com" required autocomplete="email" aria-label="email address">
         <button type="submit">email me when it opens</button>
@@ -893,7 +839,7 @@ function bindSignup() {
       });
       const out = await res.json();
       if (out.ok) {
-        form.innerHTML = '<div class="facts">you’re on the list — one email when it opens.</div>';
+        form.innerHTML = '<div class="facts" style="padding:0">you’re on the list — one email when it opens.</div>';
       } else {
         msg.textContent = out.error || 'something went wrong — try again';
         button.disabled = false;
@@ -926,28 +872,38 @@ function bindCameras() {
 function render() {
   if (!data) return;
 
-  document.getElementById('verdict').innerHTML = verdictHtml();
-  document.getElementById('board').innerHTML = boardHtml();
+  document.getElementById('fastest').innerHTML = fastestBoxHtml();
 
   const cardsEl = document.getElementById('cards');
   // re-rendering must not snap an open panel shut while it's being read
   const openMore = new Set(
     Array.from(cardsEl.querySelectorAll('details[open]')).map((d) => d.dataset.slug)
   );
+  // fastest first; the winner wears the tag. crossings without a live number sink.
+  const open = comparable();
+  const fastestSlug = (open.length > 1 && open[0].wait < open[1].wait) ? open[0].slug : null;
+  const rank = new Map(open.map((o, i) => [o.slug, i]));
   const detailCards = COMPARE_POOL
     .map((slug) => data.crossings.find((c) => c.slug === slug))
     .filter(Boolean)
-    .map(cardHtml)
+    .sort((a, b) => (rank.has(a.slug) ? rank.get(a.slug) : 99) - (rank.has(b.slug) ? rank.get(b.slug) : 99))
+    .map((c) => cardHtml(c, fastestSlug))
     .join('');
   cardsEl.innerHTML = (detailCards || '<div class="fresh">no data available</div>') + blueWaterFoldHtml();
   for (const d of cardsEl.querySelectorAll('details')) d.open = openMore.has(d.dataset.slug);
   bindCameras();
 
-  // warning strip fires on OUR pipeline falling behind (collector runs every
-  // 5 min), not on the agencies' own slower clocks — keeps the warning meaningful.
+  // global freshness in the header — how long since OUR pipeline last landed a
+  // reading (collector runs every 5 min). the per-card "reported" clock is the
+  // border's own; this one is ours.
   const newest = Math.min(
     ...data.crossings.flatMap((c) => c.readings.map((r) => minsAgo(r.fetched_at)))
   );
+  document.getElementById('checked').textContent =
+    newest === 0 ? 'checked just now' : `checked ${newest} min ago`;
+
+  // warning strip fires on OUR pipeline falling behind, not on the agencies'
+  // own slower clocks — keeps the warning meaningful.
   const strip = document.getElementById('stale');
   if (newest > 10) {
     strip.textContent = `warning — our last successful data check was ${newest} min ago. numbers may be out of date.`;
@@ -1001,12 +957,12 @@ async function loadPatterns() {
 }
 
 refresh().catch(() => {
-  document.getElementById('board').innerHTML = '<div class="fresh">we couldn\'t load the numbers — try reloading</div>';
+  document.getElementById('cards').innerHTML = '<div class="fresh">we couldn\'t load the numbers — try reloading</div>';
 });
 loadPatterns().catch(() => {});
 setInterval(() => refresh().catch(() => {}), 60000); // new numbers land every 5 min; check each minute
 setInterval(() => loadPatterns().catch(() => {}), 3600000); // history barely moves; re-pull hourly
-setInterval(render, 30000); // keep "we checked x min ago" honest between fetches
+setInterval(render, 30000); // keep "checked x min ago" honest between fetches
 </script>
 </body>
 </html>

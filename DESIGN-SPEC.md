@@ -1,15 +1,19 @@
-# xing.report — design spec v1.2
+# xing.report — design spec v2.0
 
 Live border-crossing utility, Detroit–Windsor corridor.
 One question: **which crossing do I take right now?**
 Audience: everyday travelers plus truck drivers and dispatchers — phone in a car or cab, sunlight, seconds.
-Design language: Otl Aicher / Ulm / Munich 1972 wayfinding. Signage, not a website. Warmth comes from copy, never decoration.
+Design language: **high-vis industrial** — Otl Aicher / Ulm wayfinding bones, sharpened by control-room HMI thinking and freight-yard signage. Blueprint-when-calm: a moving lane is stark ink on paper; color arrives only when something needs attention. Warmth comes from copy, never decoration.
 
-Date: 07 jul 2026 · v1.2 adds: three crossings, "fastest right now" summary, traveler-first hierarchy, friendly copy register, best-time-to-cross chart.
-v1.3 adds (approved on preview, jul 2026): the one-glance layout — verdict line, truck/car toggle, comparison board, folded rows — plus the sources footer and national-flag pictograms, the single sanctioned color exception.
-v1.4 (v2 step 2): the copy register warms for everyday crossers — "to windsor / to detroit" toggle, plain-language lane names, gentler fallback wording, "safe travels." footer close — and the per-vehicle status thresholds are wired to the lane kind.
-v1.5 (v2 step 3): "best time to cross" hourly charts from the archive, behind a per-card tap, with an honesty gate (≥7 days of history before any chart is drawn). See §6.
-v1.6 (v2 step 4): approach cameras — one curated live still per crossing, behind a "see the approach camera" tap, following the direction toggle. See §5 and the §7 exception.
+Date: 07 jul 2026 · **v2.0** is the "high-vis industrial" design system, imported from Claude Design (project `03994fb7…`, file `xing.report.dc.html`, board "turn 7") and approved on preview. It is a whole-system visual overhaul applied over the full v1.x site with no features dropped.
+
+Changelog:
+- v1.2 — three crossings, "fastest right now" summary, traveler-first hierarchy, best-time-to-cross chart.
+- v1.3 — one-glance layout: verdict line, truck/car toggle, comparison board, folded rows, sources footer, national-flag pictograms.
+- v1.4 — copy warmed for everyday crossers; per-vehicle status thresholds.
+- v1.5 — hourly "best time to cross" charts with a ≥7-day honesty gate (§6).
+- v1.6 — approach cameras, one curated still per crossing behind a tap (§5, §7).
+- **v2.0 — high-vis industrial system.** New palette (whiter paper, blacker ink, cobalt, one acid-volt highlight); 4px ink grid; 112px/900 hero numeral; three weights (400/700/900); the verdict becomes the acid-volt **fastest box**; the separate comparison board is retired — the detail cards *are* the comparison, ordered fastest-first; alerts render UPPERCASE on the grid; a global "checked n min ago" sits in the header while each card carries the border's own "reported {clock}"; night mode is a strict 1:1 inversion. Everything from v1.x (toggles, charts, cameras, folds, tolls, signup, sources, all honesty logic) is retained under the new skin.
 
 ---
 
@@ -19,83 +23,79 @@ v1.6 (v2 step 4): approach cameras — one curated live still per crossing, behi
 
 | token | hex | use |
 |---|---|---|
-| paper | `#F2F1ED` | page + card background |
-| ink | `#141414` | text, structural rules, bars |
-| hairline | `#C9C7C2` | 1px dividers |
-| muted | `#6B6963` | labels, meta text |
-| receded | `#A5A29B` | easing/steady trend, "no incidents" |
+| paper | `#F4F4F0` | page + card background |
+| ink | `#050505` | text, the 4px structural grid, chart bars |
+| muted | `#7C7C74` | labels, meta text, receded "no incidents" |
 
-### Base — night (full inversion, not a dimming)
+### Base — night (strict 1:1 inversion, not a dimming)
 
 | token | hex | use |
 |---|---|---|
-| bg | `#121212` | page + card background |
-| text | `#EDEBE6` | text, structural rules |
-| hairline | `#3A3A38` | 1px dividers |
-| muted | `#99968F` | labels, meta text |
-| receded | `#6E6C66` | easing/steady trend, "no incidents" |
+| paper | `#050505` | page + card background |
+| ink | `#F4F4F0` | text, the 4px grid (now white) |
+| muted | `#8C8C84` | labels, meta text |
 
 ### Signal (traffic semantics, HMI-calibrated)
 
 | state | day | night | rendering |
 |---|---|---|---|
-| moving | text `#008A43` | text `#3FD37F` | **no fill** — quiet green word, weight 400 |
-| slow | fill `#F5A300`, text `#141414` | fill `#FFAF1F`, text `#121212` | filled field, weight 700 |
-| backed up | fill `#E8291C`, text `#FFFFFF` | fill `#FF6047`, text `#121212` | filled field, weight 700 |
+| moving | text `#00A355` | text `#33D17A` | **no fill** — quiet green word, no block |
+| slow | fill `#FFC200`, text `#050505` | same fill | filled field, weight 900 |
+| backed up | fill `#FF2A00`, text `#F4F4F0` | same fill | filled field, weight 900 |
+| closed | fill ink, text paper | inverts | filled ink field (e.g. "lanes closed") |
 
 Rules:
-- Calm is quiet. "moving" and "no incidents" render unfilled and muted so the screen is near-silent when all is well. Filled color fields are reserved for abnormal states — amber and red jump by contrast because they are rare.
+- Calm is quiet. "moving" and "no incidents" render unfilled so the screen is near-silent when all is well. Hazard fills (amber/red) keep their vivid punch in both modes and jump by contrast because they are rare.
 - Color never carries meaning alone. Every signal field contains its status word.
 
-### Accent
+### Cobalt + acid volt
 
-| | day | night |
-|---|---|---|
-| brand accent | `#0E71B8` | `#4BA3DC` |
-
-Appears once per screen, in the wordmark (`.report`). Never in UI states, never on data.
+| token | day | night | use |
+|---|---|---|---|
+| cobalt | `#0033FF` | `#4D75FF` | the `.report` wordmark tld + links. Never on UI states or data. |
+| acid volt | `#E1FF00` | `#E1FF00` | **the one structural highlight** — the "fastest right now" box, and nowhere else. |
 
 ### National flags — the one sanctioned exception (Mark, jul 2026)
 
-The US and Canada flags render as small pictograms in their **real colors** — the only break from "color means status only." Nothing else on the page may use color for identity or decoration.
+The US and Canada flags render as small pictograms in their **real colors** — the only break from "color means status only." Nothing else uses color for identity or decoration.
 
 | flag | colors |
 |---|---|
 | us | stripes `#B22234` · canton `#3C3B6E` · white field |
 | canada | bars + maple leaf `#D52B1E` · white field |
 
-Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply on paper in both light and dark mode. Defined once in SVG `<defs>` (`#flag-us` / `#flag-ca`). They appear in exactly two places: the sources footer (one per agency row) and after the destination in the verdict line.
+Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply on paper in both modes. Defined once in SVG `<defs>` (`#flag-us` / `#flag-ca`). They appear only in the sources footer, one per agency row.
 
 ---
 
 ## 2 · Type
 
 - **Family:** `"Helvetica Neue", Helvetica, Arial, sans-serif`
-- **Weights:** 400 and 700. No others. No italics, ever.
-- **Case:** everything lowercase.
+- **Weights:** 400, 700, 900. No others. No italics, ever.
+- **Case:** everything lowercase — **except emergency alert banners, which are UPPERCASE.**
 
 | role | size / line | weight | notes |
 |---|---|---|---|
-| wait numeral (trucker view) | 96 / 91 | 700 | `font-variant-numeric: tabular-nums`, tracking −0.02em, `white-space: nowrap` |
-| wait numeral (3-crossing view) | 72 / 68 | 700 | same rules; smaller so three cards fit one scroll |
-| nexus numeral | 40 / 40 | 700 | tabular-nums |
-| crossing name | 28 / 32 (single card) · 22 / 26 (3-crossing list) | 700 | |
-| summary strip | label 13 · name + numeral 28 / 32, 700 | | "fastest right now" |
-| status word | 20 (single card) · 16 (3-crossing list) | 700 on fill · 400 unfilled (moving) | lowercase, inside signal field |
-| trend line | 15 / 16 | 700 climbing · 400 easing/steady | one word only: ▲ climbing · ▼ easing · — steady |
-| meta / body | 15 / 20 | 400 | tolls, direction, source line |
-| label | 13 / 16 | 400 | tracking +0.08em, lowercase (truck / car / nexus) |
-| unit suffix (" min") | 16 | 400 | muted color |
+| wait numeral (hero) | 112 / 100 | 900 | `tabular-nums`, tracking −0.04em, `white-space: nowrap`. Drops to 92/84 under 400px. |
+| nexus / car minor numeral | 40 / 40 | 900 | tabular-nums, tracking −0.02em |
+| fastest box name + min | 28 / 30 | 900 | on acid volt; label above is 13px 700 +0.08em |
+| crossing name | 24 / 26 | 900 | in the card head, beside the status word |
+| status word | 16 | 900 on fill · green word unfilled (moving) | lowercase, inside signal field |
+| trend line | 15 / 18 | 900 climbing · 400 easing/steady | one word: ▲ climbing · ▼ easing · — steady |
+| meta / body | 15 / 20 | 400 | "reported {clock}", source line |
+| label | 13 / 16 | 400–700 | tracking +0.08em, lowercase (truck wait / car / nexus) |
+| unit suffix (" min") | 22 (hero) · 14 (minor) | 400 | tracking 0 |
+| alert banner | 13 | 900 | UPPERCASE, +0.08em, on a signal fill |
 
 ---
 
 ## 3 · Grid + spacing
 
-- **Base unit:** 8px. Every dimension is a multiple.
-- **Mobile margin:** 16px (2u) · content 358px on a 390px viewport.
-- **Card padding:** 24px (3u) · internal gaps 16px (2u).
-- **Rules:** structural borders 2px ink · dividers 1px hairline.
-- **Tap targets:** ≥ 56px (7u) — glove-sized. Direction toggle cells are 56px tall.
+- **Base unit:** 8px. Most dimensions are a multiple.
+- **Mobile margin:** 16px (2u) · `main` max-width 440px.
+- **The grid:** structural borders and cell divisions are **4px ink**; internal row dividers within a card are **2px ink**. No hairlines — every edge is a hard ink rule.
+- **Card:** no outer padding; each row insets 16px. Rows are separated by 2px ink rules (minor lanes, fresh line, alert, folds).
+- **Tap targets:** ≥ 56px (7u). Toggle cells are 60px tall; fold summaries ≥ 60px.
 - **Radius / shadow:** 0 / none. Hard edges only.
 - **Pictograms:** 48×30 viewBox, 2.5 stroke, no fill, `stroke="currentColor"`. Truck = box + cab + two wheels. Car = single cab silhouette + two wheels. Nexus = diamond outline.
 
@@ -103,39 +103,39 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 
 ## 4 · Wordmark
 
-- ✕ mark (two crossed 7px bars at ±45°) + `xing` (700, ink) + `.report` (400, accent).
-- Mark and text sit on a solid plate (paper, ink, or accent) — never floated over imagery.
-- On accent plate: all-white text, `.report` at 72% opacity.
+- ✕ mark (two crossed bars at ±45°, 5px stroke) + `xing` (900, ink) + `.report` (400, cobalt).
+- Left of the header; the global "checked n min ago" freshness sits at the right.
+- Mark and text sit on the paper plate — never floated over imagery.
 
 ---
 
 ## 5 · Behavior rules
 
 - **Status thresholds** — judged per lane kind, because a routine truck wait is a miserable car wait. Truck lanes: < 20 min = moving · 20–59 = slow · ≥ 60 = backed up. Car and nexus lanes: < 15 = moving · 15–44 = slow · ≥ 45 = backed up.
-- **The verdict:** one line above everything, 28px 700, that names the winner for the chosen direction and vehicle — "take the tunnel to windsor — 5 min vs 12 min for cars" — with the destination wearing its country's flag. It answers the whole question for people who won't read further. Recomputes with both toggles. Never crowned on a closed lane or data older than 10 min.
-- **Comparison board:** one bordered signboard under the toggles — ambassador and tunnel, fastest first, a "fastest" tag on a strict winner only (no tag on a tie). 72px numerals. Blue water (a 60-mile diversion) and gordie howe (not open yet) fold to single tap-to-expand rows below the detail cards; an active incident shows through the fold.
-- **Crossings:** ambassador, detroit–windsor tunnel, blue water bridge. The tunnel is a passenger crossing first — the car wait leads its card — but it does take small trucks (under 12′8″ tall, operator faq); wherever a trucker might act on a tunnel number, the caveat "small trucks only — under 12′8″ tall" appears with it.
-- **Hierarchy (traveler view):** car wait is the hero numeral; truck + nexus waits move to a 15px sub-line.
-- **Trend:** every lane always shows exactly one word next to its wait — ▲ climbing · ▼ easing · — steady — based on the last 15–30 min. Never a number, never blank. Climbing is ink-dark 700; easing and steady recede.
-- **Hierarchy:** nothing on a card renders larger than the wait numeral.
-- **Freshness:** "updated n min ago" is mandatory on every live view; stale > 10 min shows a warning strip.
-- **Alert strip:** one incident per card (more become "+ n more"). With an incident: filled field, 700; a full closure uses the red field. Without: "no incidents" unfilled in receded color, 400. The text **wraps to stay fully readable** — never clipped with an ellipsis, because a safety alert you can't finish reading fails the trust rule (which outranks the calm one-line ideal). The text is already the compact form (road + side + lanes affected), so it stays short.
-- **Toggles:** two side-by-side — direction ("to windsor" / "to detroit") and vehicle ("truck" / "car"). Cells 56px tall; active cell is inverted (ink fill, paper text). Together they drive the verdict, the board, and every card; both choices persist across reloads. The chosen vehicle leads every card, so the eye finds the same thing in the same place.
-- **Approach camera:** one curated live still per crossing, behind a "see the approach camera" tap (calm-first, like the chart). It follows the direction toggle — heading into Canada you queue on the U.S. side, so that side shows, and vice versa. The image is loaded straight from the publishing agency (never stored or re-hosted), captioned with its location and source ("i-75 at the bridge approach · detroit · mdot mi drive"), and both agencies (mdot mi drive, ontario 511) are named in the sources footer. A down camera shows a calm "camera temporarily unavailable" line — never a broken-image icon. Curated + verified by hand in `cameras.js`, one camera per side per crossing; never scraped, never a wall of pins.
-- **Copy register (traveler warmth):** "checked 2 min ago" over "updated", "min by car" over bare units, "safe travels · data from cbsa + cbp lane sensors" as the footer. Warmth is words only — geometry, color, and edges never soften.
-- **Night mode:** same geometry, swapped palette per §1.
+- **The fastest box:** one acid-volt block at the top — the single saturated element on the page. A 13px label ("fastest for freight right now" / "fastest for cars right now", following the vehicle toggle) over the winner's name and minutes at 28px/900. Names a strict winner, or "either crossing" on a tie. Never crowned on a closed lane or data older than 10 min; hidden entirely when nothing qualifies. When the tunnel wins for trucks, the "small trucks only — under 12′8″ tall" caveat rides beneath.
+- **The cards are the comparison.** There is no separate board (retired in v2.0). Ambassador and tunnel render as full detail cards, **ordered fastest-first**, a "fastest" tag on a strict winner only (no tag on a tie). Each card head is the crossing name + its status word. Blue water (a 60-mile diversion) and gordie howe (not open yet) fold to single tap-to-expand rows below; blue water's collapsed summary carries its status word so an incident is flagged without opening.
+- **Card body order:** name + status → vehicle lane label ("truck wait") → 112px hero numeral → "reported {clock}" + trend → minor lanes (the other vehicle + nexus, split by a 2px rule) → alert row → camera / best-times / tolls folds. The chosen vehicle leads every card, so the eye finds the same thing in the same place.
+- **Crossings:** ambassador, detroit–windsor tunnel, blue water bridge. The tunnel takes small trucks (under 12′8″ tall, operator faq); wherever a trucker might act on a tunnel number, the caveat appears with it.
+- **Trend:** every lane always shows exactly one word next to its wait — ▲ climbing · ▼ easing · — steady — based on the last 15–30 min. Never a number, never blank. Climbing is ink 900; easing and steady recede.
+- **Hierarchy:** nothing on a card renders larger than the hero wait numeral.
+- **Freshness — two clocks, told apart:** a global "checked n min ago" in the header is *our* pipeline (collector runs every 5 min); each card's "reported {clock}" is the *border's own* time. Our pipeline stale > 10 min shows the amber warning strip.
+- **Alert row:** one incident per card, UPPERCASE on a signal fill (amber = lanes affected, red = full closure), separated by a 2px rule. Without an incident: "no incidents" in muted, unfilled. If our alert collection isn't current (> 15 min), we say "we can't check road incidents right now" rather than claim none. Text wraps to stay fully readable — never clipped; a safety alert you can't finish reading fails the trust rule, which outranks the calm ideal.
+- **Toggles:** two stacked full-width bars — direction ("det → win" / "win → det") and vehicle ("truck" / "car"), 60px cells, active cell inverted (ink fill, paper text). Both drive the fastest box and every card; both persist across reloads.
+- **Approach camera:** one curated live still per crossing, behind a "see the approach camera" tap. Follows the direction toggle — heading into Canada you queue on the U.S. side, so that side shows. Loaded straight from the publishing agency (never stored or re-hosted), captioned with location + source, agencies named in the footer. A down camera shows a calm "camera temporarily unavailable" line — never a broken-image icon. Curated + verified by hand in `cameras.js`; never scraped.
+- **Copy register:** "checked 2 min ago" over "updated", "haul safe · data from cbsa + cbp lane sensors" as the footer close. Warmth is words only — geometry, color, and edges never soften.
+- **Night mode:** same geometry, strict palette inversion per §1.
 
 ---
 
 ## 6 · Chart styles
 
-Shared rules — bars in ink only (signal colors never fill data), one reference line (1px hairline, right-aligned tabular label), baseline 2px ink rule, axis labels 13px lowercase, no gridlines beyond the reference line.
+Shared rules — bars in ink only (signal colors never fill data), baseline 2px ink rule, axis labels 13px lowercase, no gridlines.
 
-**"corridor by the numbers"** (monthly volume): 12 bars, gap 8px (1u), single-letter months. One callout row max (e.g. "peak · april 2026 — 251k"), 15px, value 700 tabular.
+**"best time to cross"** (hourly wait): 24 bars, gap 4px, sparse hour ticks (12a · 6a · 12p · 6p · 11p). Two callout rows: quietest window in quiet-green text (`#00A355` day / `#33D17A` night, 400) and busiest window in ink 900 — color always paired with words. Follows the direction + vehicle toggles; lives behind a "best times to cross" tap so the glance screen stays calm.
 
-**"best time to cross"** (hourly wait): 24 bars, gap 4px, sparse hour ticks (12a · 6a · 12p · 6p · 11p). Two callout rows: quietest window in quiet-green text (`#008A43` day / `#3FD37F` night, 400) and busiest window in ink 700 — color always paired with words. Follows the direction + vehicle toggles; lives behind a "best times to cross" tap so the glance screen stays calm.
+**"corridor by the numbers"** (future, monthly volume): 12 bars, gap 8px, single-letter months. One callout row max, value 900 tabular.
 
-**Honesty gate (v1.5):** the chart is only drawn once the archive holds at least 7 days of history (built from a 90-day lookback of the readings table, bucketed to local hour). Below that, the card shows one calm muted line — "gathering data … about N days to go" — never a confident-looking chart from thin data. An hour with no history renders as a gap, not a zero. Served by the read-only `/api/patterns` endpoint, cached an hour.
+**Honesty gate:** the chart is only drawn once the archive holds at least 7 days of history (built from a 90-day lookback of the readings table, bucketed to local hour). Below that, the card shows one calm muted line — "gathering data … about N days to go" — never a confident-looking chart from thin data. An hour with no history renders as a gap, not a zero. Served by the read-only `/api/patterns` endpoint, cached an hour.
 
 ---
 
@@ -143,4 +143,4 @@ Shared rules — bars in ink only (signal colors never fill data), one reference
 
 Gradients, drop shadows, glassmorphism, rounded corners, emoji, stock illustration, hero images, decorative anything. If it looks like a template or a startup landing page, it is wrong.
 
-The one image exception: a live approach camera (§5) is data, not decoration — it is allowed, but only credited, only behind a tap, and only one per crossing. No other photography.
+The one image exception: a live approach camera (§5) is data, not decoration — allowed, but only credited, only behind a tap, and only one per crossing. No other photography.
