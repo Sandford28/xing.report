@@ -157,7 +157,7 @@ Adopted from the CI manual (Claude Design project `03994fb7…`, file `xing.repo
 
 **Geometry** (drawn on a 120×120 field, `viewBox="0 0 120 120"`):
 - Two spans: `<rect>` 92×22, one at `rotate(45 60 60)`, one at `rotate(-45 60 60)` — heavy bars (ink-900 weight) crossing corner-to-corner at ±45° exactly.
-- The jewel: `<circle r="8.5">` reveal (the page ground, a true cut-out) under `<circle r="6.5">` in volt, both at centre (60,60).
+- The jewel: `<circle r="11">` reveal (the page ground, a true cut-out) under `<circle r="6.5">` in volt, both at centre (60,60). The reveal was enlarged from the manual's 8.5 to **11** (Mark, jul 2026): the manual's 2-unit ring reads as a poster but collapses to nothing at header size, leaving the volt stuck on the ink. At r=11 the jewel sits in a generous, visible paper socket at every scale — the reference look.
 - Radius 0 — razor edges only.
 
 **Color, two placements:**
