@@ -938,7 +938,7 @@ function cameraHtml(crossing) {
     <summary>see the approach camera</summary>
     <div class="cam">
       <div class="cam-frame">
-        <img class="cam-img" data-src="${cam.image}"
+        <img class="cam-img" data-src="${cam.image}" data-net="${cam.network}"
              alt="live approach camera — ${cam.where}">
         <div class="cam-down" hidden>camera temporarily unavailable</div>
       </div>
@@ -1099,8 +1099,16 @@ function bindCameras() {
     const down = img.parentElement.querySelector('.cam-down');
     const fail = () => { img.hidden = true; if (down) down.hidden = false; };
     const ok = () => { img.hidden = false; if (down) down.hidden = true; };
+    // MDOT serves a 1920×1080 "stream not available" placeholder (HTTP 200) when
+    // a camera is down — a real load, so 'error' never fires. Its real frames are
+    // small thumbnails (≤ ~350px wide), so an oversized MDOT image is that
+    // placeholder: show our calm "unavailable" line, not MDOT's black box.
+    // Ontario 511 frames are legitimately large (up to 1280px), so only MDOT is
+    // size-checked.
+    const isMdotPlaceholder = () =>
+      /mdot/i.test(img.dataset.net || '') && img.naturalWidth >= 1000;
     img.addEventListener('error', fail);
-    img.addEventListener('load', ok);
+    img.addEventListener('load', () => (isMdotPlaceholder() ? fail() : ok()));
     // load on open; the browser's own cache keeps the frame fresh (511 ~20s).
     const load = () => { if (!img.getAttribute('src')) img.src = img.dataset.src; };
     if (details && details.open) load();
