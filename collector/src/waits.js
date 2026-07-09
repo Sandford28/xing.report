@@ -18,7 +18,9 @@ export default {
   },
 };
 
-async function collectWaits(env) {
+// exported so worker B can run it as a self-healing backstop when worker A's
+// cron stalls (see alerts.js). idempotent: safe to call from either worker.
+export async function collectWaits(env) {
   const fetchedAt = new Date().toISOString();
   const { results: crossings } = await env.DB
     .prepare('SELECT * FROM crossings WHERE active = 1')
