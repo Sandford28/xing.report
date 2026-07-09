@@ -10,7 +10,8 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#F4F4F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20width='24'%20height='24'%20fill='%230033FF'/%3E%3Cpath%20d='M5%205%20L19%2019%20M19%205%20L5%2019'%20stroke='white'%20stroke-width='4'/%3E%3C/svg%3E">
+<!-- favicon: the jeweled-junction mark (CI manual concept b) — paper ✕ + volt jewel on ink, matches the pwa tiles -->
+<link rel="icon" href="data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20120%20120'><rect%20width='120'%20height='120'%20fill='%23050505'/><g%20transform='translate(24%2024)%20scale(0.6)'><rect%20x='14'%20y='49'%20width='92'%20height='22'%20transform='rotate(45%2060%2060)'%20fill='%23F4F4F0'/><rect%20x='14'%20y='49'%20width='92'%20height='22'%20transform='rotate(-45%2060%2060)'%20fill='%23F4F4F0'/><circle%20cx='60'%20cy='60'%20r='8.5'%20fill='%23050505'/><circle%20cx='60'%20cy='60'%20r='6.5'%20fill='%23E1FF00'/></g></svg>">
 <!-- add to home screen: a tap-to-open tile for daily glancers (phone in a cab) -->
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -149,6 +150,12 @@ header {
   font-size: 24px; font-weight: 900;
 }
 .wordmark svg { display: block; }
+/* jeweled-junction mark (CI manual §8): ink bars invert to paper at night; the
+   reveal is the page ground so the ring stays a true cut-out; the jewel is the
+   one volt point, held constant in both modes. */
+.wordmark .mark .bar { fill: var(--ink); }
+.wordmark .mark .reveal { fill: var(--paper); }
+.wordmark .mark .jewel { fill: var(--volt); }
 .wordmark .tld { font-weight: 400; color: var(--cobalt); }
 .checked { font-size: 13px; color: var(--muted); white-space: nowrap; }
 
@@ -185,13 +192,19 @@ header {
 }
 .toggle button {
   height: 60px;
-  font: 900 16px/18px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 18px;
+  /* unselected recedes: muted + regular weight. the chosen cell is the only
+     ink block, and the only bold text — so "which am i on" is unmistakable. */
+  font-weight: 400; color: var(--muted);
   text-transform: lowercase;
-  background: none; color: var(--ink);
-  border: none; cursor: pointer;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+.toggle button .fl { width: 22px; height: 14px; flex: none; display: block; }
 .toggle button:first-child { border-right: 4px solid var(--ink); }
-.toggle button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.toggle button[aria-pressed="true"] {
+  background: var(--ink); color: var(--paper); font-weight: 700;
+}
 
 .section-label {
   font-size: 13px; line-height: 16px; letter-spacing: 0.08em;
@@ -323,11 +336,18 @@ details.fold { border: 4px solid var(--ink); }
 .facts .as-of { font-size: 13px; line-height: 16px; margin-top: 4px; }
 .facts .unverified { color: var(--muted); }
 .fact-main { font-weight: 700; }
+/* links carry the context — ink + underline (cobalt stays unique to the wordmark),
+   open in a new tab. the ↗ marks an off-site source. */
+.facts a { color: var(--ink); text-decoration: underline; }
 .toll-row {
   display: flex; justify-content: space-between; align-items: baseline;
-  gap: 12px; flex-wrap: wrap; margin-top: 4px;
+  gap: 12px; flex-wrap: wrap; margin-top: 10px;
 }
-.toll-row .toll-price { font-weight: 700; font-variant-numeric: tabular-nums; }
+.toll-row .toll-label { color: var(--ink); }
+.toll-row .toll-price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* the posted price is the real one and leads; a converted currency is our
+   estimate and recedes so the row reads as one number, not two competing ones. */
+.toll-price .est { font-weight: 400; color: var(--muted); }
 .call {
   display: flex; align-items: center; justify-content: center;
   min-height: 56px; margin-top: 8px;
@@ -415,9 +435,13 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
 
 <header>
   <span class="wordmark">
-    <!-- ✕ mark: two crossed bars at ±45° (§4) -->
-    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 4 L20 20 M20 4 L4 20" stroke="currentColor" stroke-width="5"/>
+    <!-- jeweled-junction mark: two heavy ink spans cross and lock, a volt jewel
+         set in the joint like a bridge pier (CI manual concept b, §8) -->
+    <svg class="mark" width="26" height="26" viewBox="0 0 120 120" aria-hidden="true">
+      <rect class="bar" x="14" y="49" width="92" height="22" transform="rotate(45 60 60)"/>
+      <rect class="bar" x="14" y="49" width="92" height="22" transform="rotate(-45 60 60)"/>
+      <circle class="reveal" cx="60" cy="60" r="8.5"/>
+      <circle class="jewel" cx="60" cy="60" r="6.5"/>
     </svg>
     xing<span class="tld">.report</span>
   </span>
@@ -439,8 +463,16 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
   </noscript>
   <div id="fastest"></div>
   <nav class="toggle" aria-label="direction">
-    <button id="btn-to_canada" aria-pressed="true">det &#8594; win</button>
-    <button id="btn-to_us" aria-pressed="false">win &#8594; det</button>
+    <button id="btn-to_canada" aria-pressed="true">
+      <svg class="fl" viewBox="0 0 22 14" aria-hidden="true"><use href="#flag-us"/></svg>
+      det &#8594; win
+      <svg class="fl" viewBox="0 0 22 14" aria-hidden="true"><use href="#flag-ca"/></svg>
+    </button>
+    <button id="btn-to_us" aria-pressed="false">
+      <svg class="fl" viewBox="0 0 22 14" aria-hidden="true"><use href="#flag-ca"/></svg>
+      win &#8594; det
+      <svg class="fl" viewBox="0 0 22 14" aria-hidden="true"><use href="#flag-us"/></svg>
+    </button>
   </nav>
   <nav class="toggle" aria-label="vehicle">
     <button id="btn-truck" aria-pressed="true">truck</button>
@@ -710,28 +742,36 @@ function shortDate(iso) {
     .format(new Date(iso + 'T00:00:00Z')).toLowerCase();
 }
 
-// tolls: the operator's real posted prices wherever they exist; a currency
-// the operator doesn't post is calculated at the bank of canada rate and
-// marked "≈" as our estimate. returns [html, usedEstimate].
-function tollLine(row) {
+const BOC_URL = 'https://www.bankofcanada.ca/rates/exchange/daily-exchange-rates/';
+
+// every figure is one tap from where it comes from. links are the "context"
+// (ink + underline, new tab); the label defaults to the source's own domain
+// so you can see who posted the number before you even click.
+function sourceHost(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'source'; }
+}
+function srcLink(url, label) {
+  return url ? `<a href="${url}" target="_blank" rel="noopener">${label || sourceHost(url)}</a>` : '';
+}
+// a muted fine-print line built from parts (notes, links, dates); empty parts drop out
+function fine(parts) {
+  const kept = parts.filter(Boolean);
+  return kept.length ? `<div class="as-of">${kept.join(' · ')}</div>` : '';
+}
+
+// tolls: the operator's real posted price leads; a currency the operator doesn't
+// post is our estimate at the bank of canada rate — shown muted and marked "≈".
+// returns [priceHtml, usedEstimate].
+function tollPrice(row) {
   const parts = [];
   let estimated = false;
-  if (row.usd !== null && row.usd !== undefined) parts.push(`${money(row.usd)} usd`);
-  else if (row.cad !== null && row.cad !== undefined && data.usd_cad) {
-    parts.push(`≈${money(row.cad / data.usd_cad.rate)} usd`);
-    estimated = true;
-  }
-  if (row.cad !== null && row.cad !== undefined) parts.push(`${money(row.cad)} cad`);
-  else if (row.usd !== null && row.usd !== undefined && data.usd_cad) {
-    parts.push(`≈${money(row.usd * data.usd_cad.rate)} cad`);
-    estimated = true;
-  }
-  // the price reads as one clean line; notes and dates recede to fine print
-  const meta = [];
-  if (row.note) meta.push(row.note);
-  if (row.as_of) meta.push(`posted ${shortDate(row.as_of)}`);
-  const metaHtml = meta.length ? `<div class="as-of">${meta.join(' · ')}</div>` : '';
-  return [`<div class="toll-row"><span>${row.label}</span><span class="toll-price">${parts.join(' · ')}</span></div>${metaHtml}`, estimated];
+  const hasUsd = row.usd !== null && row.usd !== undefined;
+  const hasCad = row.cad !== null && row.cad !== undefined;
+  if (hasUsd) parts.push(`${money(row.usd)} usd`);
+  else if (hasCad && data.usd_cad) { parts.push(`<span class="est">≈${money(row.cad / data.usd_cad.rate)} usd</span>`); estimated = true; }
+  if (hasCad) parts.push(`${money(row.cad)} cad`);
+  else if (hasUsd && data.usd_cad) { parts.push(`<span class="est">≈${money(row.usd * data.usd_cad.rate)} cad</span>`); estimated = true; }
+  return [parts.join(' · '), estimated];
 }
 
 // short detail lines plus a glove-sized tap-to-call button — shared by
@@ -747,7 +787,8 @@ function factLines(entry) {
 // never guessed, never silently absent.
 function hazmatLine(hazmat) {
   if (hazmat && hazmat.status) {
-    return `<div class="label">hazmat</div><div class="fact-main">${hazmat.status}</div>${factLines(hazmat)}<div class="as-of">verified ${shortDate(hazmat.last_verified)}</div>`;
+    return `<div class="label">hazmat</div><div class="fact-main">${hazmat.status}</div>${factLines(hazmat)}`
+      + fine([`verified ${shortDate(hazmat.last_verified)}`, srcLink(hazmat.source)]);
   }
   return `<div class="label">hazmat</div><div class="unverified">not yet verified — check with the crossing operator</div>`;
 }
@@ -758,23 +799,33 @@ function factsHtml(info, slug) {
   if (info.tolls) {
     rows += `<div class="label">tolls</div>`;
     let anyEstimate = false;
+    // one shared "posted" date collapses to a single footnote; per-row dates
+    // stay only when the rows genuinely differ, so the list isn't a wall of dates.
+    const dates = info.tolls.rows.map((r) => r.as_of).filter(Boolean);
+    const oneDate = dates.length && dates.every((d) => d === dates[0]) ? dates[0] : null;
+    let lastSrc = null; // the operator link shows once, on the first row it applies to
     for (const r of info.tolls.rows) {
-      const [line, estimated] = tollLine(r);
+      const [price, estimated] = tollPrice(r);
       anyEstimate = anyEstimate || estimated;
-      rows += line;
+      const link = r.source && r.source !== lastSrc ? srcLink(r.source) : '';
+      lastSrc = r.source || lastSrc;
+      rows += `<div class="toll-row"><span class="toll-label">${r.label}</span><span class="toll-price">${price}</span></div>`;
+      rows += fine([r.note, oneDate ? '' : (r.as_of ? `posted ${shortDate(r.as_of)}` : ''), link]);
     }
-    if (anyEstimate && data.usd_cad) {
-      rows += `<div class="as-of">≈ is our estimate at the bank of canada rate of ${shortDate(data.usd_cad.date)} — not a posted price</div>`;
-    }
+    const foot = [];
+    if (oneDate) foot.push(`posted ${shortDate(oneDate)}`);
+    if (anyEstimate && data.usd_cad) foot.push(`≈ = ${srcLink(BOC_URL, 'bank of canada')} rate ${shortDate(data.usd_cad.date)}, not a posted price`);
+    rows += fine(foot);
   }
   if (info.hours) {
     rows += `<div class="label">hours</div>`;
-    rows += `<div class="fact-main">${info.hours.text}</div><div class="as-of">checked ${shortDate(info.hours.as_of)}</div>`;
+    rows += `<div class="fact-main">${info.hours.text}</div>`;
+    rows += fine([`checked ${shortDate(info.hours.as_of)}`, srcLink(info.hours.source)]);
   }
   if (info.limits) {
     rows += `<div class="label">limits</div>`;
     rows += `<div class="fact-main">${info.limits.text}</div>${factLines(info.limits)}`;
-    rows += `<div class="as-of">checked ${shortDate(info.limits.as_of)}</div>`;
+    rows += fine([`checked ${shortDate(info.limits.as_of)}`, srcLink(info.limits.source)]);
   }
   rows += hazmatLine(info.hazmat);
   return `<details class="more" data-slug="${slug}">

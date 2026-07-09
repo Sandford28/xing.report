@@ -1,4 +1,4 @@
-# xing.report — design spec v2.0
+# xing.report — design spec v2.2
 
 Live border-crossing utility, Detroit–Windsor corridor.
 One question: **which crossing do I take right now?**
@@ -14,6 +14,9 @@ Changelog:
 - v1.5 — hourly "best time to cross" charts with a ≥7-day honesty gate (§6).
 - v1.6 — approach cameras, one curated still per crossing behind a tap (§5, §7).
 - **v2.0 — high-vis industrial system.** New palette (whiter paper, blacker ink, cobalt, one acid-volt highlight); 4px ink grid; 112px/900 hero numeral; three weights (400/700/900); the verdict becomes the acid-volt **fastest box**; the separate comparison board is retired — the detail cards *are* the comparison, ordered fastest-first; alerts render UPPERCASE on the grid; a global "checked n min ago" sits in the header while each card carries the border's own "reported {clock}"; night mode is a strict 1:1 inversion. Everything from v1.x (toggles, charts, cameras, folds, tolls, signup, sources, all honesty logic) is retained under the new skin.
+- **v2.1 — the mark (§8).** Adopted the CI manual's jeweled-junction ✕ (concept b): the plain crossed-bars mark gains a volt jewel set in the joint. Replaces the header mark, the SVG favicon, and the 192/512 PWA tiles from one drawing. Imported from Claude Design file `xing.report CI manual.dc.html`.
+- **v2.2 — Univers prepared, on hold (§2).** Built and proved a full Univers implementation (self-hosted subset woff2, provided by Mark; text 400/700, hero in Univers Condensed Bold) but **deferred it from production pending web-embedding licensing** — prod continues on Helvetica. The mark, toggles, and tolls work below shipped without it.
+- **v2.2 — the mark, clearer toggles, decluttered tolls.** Shipped to prod: the jeweled-junction mark (§8) as header/favicon/PWA tiles; the toggle selected-state fix + direction flags (§5); and the tolls-fold declutter with per-operator source links (§5).
 
 ---
 
@@ -64,15 +67,16 @@ The US and Canada flags render as small pictograms in their **real colors** — 
 | us | stripes `#B22234` · canton `#3C3B6E` · white field |
 | canada | bars + maple leaf `#D52B1E` · white field |
 
-Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply on paper in both modes. Defined once in SVG `<defs>` (`#flag-us` / `#flag-ca`). They appear only in the sources footer, one per agency row.
+Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply on paper in both modes. Defined once in SVG `<defs>` (`#flag-us` / `#flag-ca`). They appear in two places only: the **direction toggle** (origin→destination, §5) and the **sources footer** (one per agency row). The hairline follows `currentColor`, so on the selected toggle cell it's paper, on the muted cell it's grey.
 
 ---
 
 ## 2 · Type
 
-- **Family:** `"Helvetica Neue", Helvetica, Arial, sans-serif`
+- **Family:** `"Helvetica Neue", Helvetica, Arial, sans-serif`.
 - **Weights:** 400, 700, 900. No others. No italics, ever.
 - **Case:** everything lowercase — **except emergency alert banners, which are UPPERCASE.**
+- **Univers is the intended face** — the wayfinding tradition this system is drawn on — and a full implementation (subset self-hosted woff2, `--font-sans`/`--font-cond`, hero in Univers Condensed Bold) is prepared and proven on preview. It is **on hold pending web-embedding licensing** (Univers is a commercial typeface); production ships Helvetica until that clears. Re-enabling is a one-step swap — recipe in the project memory, font files backed up.
 
 | role | size / line | weight | notes |
 |---|---|---|---|
@@ -103,7 +107,7 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 
 ## 4 · Wordmark
 
-- ✕ mark (two crossed bars at ±45°, 5px stroke) + `xing` (900, ink) + `.report` (400, cobalt).
+- The **jeweled-junction mark** (see §8) + `xing` (900, ink) + `.report` (400, cobalt).
 - Left of the header; the global "checked n min ago" freshness sits at the right.
 - Mark and text sit on the paper plate — never floated over imagery.
 
@@ -120,9 +124,9 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 - **Hierarchy:** nothing on a card renders larger than the hero wait numeral.
 - **Freshness — two clocks, told apart:** a global "checked n min ago" in the header is *our* pipeline (collector runs every 5 min); each card's "reported {clock}" is the *border's own* time. Our pipeline stale > 10 min shows the amber warning strip.
 - **Alert row:** one incident per card, UPPERCASE on a signal fill (amber = lanes affected, red = full closure), separated by a 2px rule. Without an incident: "no incidents" in muted, unfilled. If our alert collection isn't current (> 15 min), we say "we can't check road incidents right now" rather than claim none. Text wraps to stay fully readable — never clipped; a safety alert you can't finish reading fails the trust rule, which outranks the calm ideal.
-- **Toggles:** two stacked full-width bars — direction ("det → win" / "win → det") and vehicle ("truck" / "car"), 60px cells, active cell inverted (ink fill, paper text). Both drive the fastest box and every card; both persist across reloads.
+- **Toggles:** two stacked full-width bars — direction ("det → win" / "win → det") and vehicle ("truck" / "car"), 60px cells. **The selected cell is the only ink block and the only bold text; the unselected cell recedes to muted grey at regular weight** — so which one is active is unmistakable at a glance (a screenshot-tested fix, jul 2026). The **direction cells carry the national flags** origin→destination: det→win shows 🇺🇸→🇨🇦, win→det shows 🇨🇦→🇺🇸 (see §1 flag exception). Both drive the fastest box and every card; both persist across reloads.
 - **Approach camera:** one curated live still per crossing, behind a "see the approach camera" tap. Follows the direction toggle — heading into Canada you queue on the U.S. side, so that side shows. Loaded straight from the publishing agency (never stored or re-hosted), captioned with location + source, agencies named in the footer. A down camera shows a calm "camera temporarily unavailable" line — never a broken-image icon. Curated + verified by hand in `cameras.js`; never scraped.
-- **Copy register:** "checked 2 min ago" over "updated", "haul safe · data from cbsa + cbp lane sensors" as the footer close. Warmth is words only — geometry, color, and edges never soften.
+- **Tolls & rules fold:** every figure is one tap from its authority — the operator's `source` URL renders as an ink-underlined link (cobalt stays the wordmark's alone), labelled with the source's own domain (e.g. `bluewaterbridge.ca`), shown **once per operator** (rows are ordered so an operator's prices group together). The **posted** price leads in bold; a currency the operator doesn't post is *our* estimate at the Bank of Canada rate — shown muted with a `≈` and never bold, so a real price and a conversion never look alike. Repeated dates collapse: when every row shares one "posted" date it becomes a single footnote (with "bank of canada" linked); per-row dates stay only when they genuinely differ (e.g. the Ambassador's three effective dates). Hours, limits, and hazmat each carry their own source link. Declutter + provenance were a direct fix (Mark, jul 2026): the fold read as a wall of equal-weight numbers with no way to check any of them.
 - **Night mode:** same geometry, strict palette inversion per §1.
 
 ---
@@ -144,3 +148,22 @@ Shared rules — bars in ink only (signal colors never fill data), baseline 2px 
 Gradients, drop shadows, glassmorphism, rounded corners, emoji, stock illustration, hero images, decorative anything. If it looks like a template or a startup landing page, it is wrong.
 
 The one image exception: a live approach camera (§5) is data, not decoration — allowed, but only credited, only behind a tap, and only one per crossing. No other photography.
+
+---
+
+## 8 · The mark
+
+Adopted from the CI manual (Claude Design project `03994fb7…`, file `xing.report CI manual.dc.html`, **concept b · "jeweled junction"** — chosen over concept a "radiant" and concept c "two masses"). The ✕ is the corridor itself: two paths meeting at a junction, with a single acid-volt point where the crossing happens — the same volt as the "fastest" box, so brand and function are the same pixel.
+
+**Geometry** (drawn on a 120×120 field, `viewBox="0 0 120 120"`):
+- Two spans: `<rect>` 92×22, one at `rotate(45 60 60)`, one at `rotate(-45 60 60)` — heavy bars (ink-900 weight) crossing corner-to-corner at ±45° exactly.
+- The jewel: `<circle r="8.5">` reveal (the page ground, a true cut-out) under `<circle r="6.5">` in volt, both at centre (60,60).
+- Radius 0 — razor edges only.
+
+**Color, two placements:**
+- *On paper* (header, day): bars ink `#050505`, reveal paper `#F4F4F0`, jewel volt `#E1FF00`. At night the bars invert to paper and the reveal to ink (they follow `--ink`/`--paper`); the jewel holds volt in both modes.
+- *On ink* (favicon, PWA tiles, dark plates): a full-bleed ink `#050505` ground, bars paper `#F4F4F0`, reveal ink, jewel volt. The mark sits at 60% scale centred, which keeps it inside the maskable safe zone.
+
+**Sizes & minimums:** clear space on every side = one jewel width. Minimum 16px on screen / 6mm in print; below that the volt reveal collapses — drop to the solid ink ✕ without the jewel. Geometry never changes across scales — only the reveal inverts for dark placements. The lockup always sits on a solid plate (paper or ink), never floated over imagery.
+
+**Where it lives:** the inline header mark (theme-aware via CSS classes `.bar`/`.reveal`/`.jewel`), the SVG favicon data-URI, and the 192/512 PNG tiles in `manifest.json`. Concepts a and c are kept in the manual as alternates; switching the lead re-drives all three placements from the same drawing.

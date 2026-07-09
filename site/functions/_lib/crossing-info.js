@@ -120,6 +120,9 @@ export const CROSSING_INFO = {
   },
   'blue-water-bridge': {
     place: 'port huron–sarnia, about 60 miles north of detroit–windsor',
+    // ordered by destination so the two operators group together: both sarnia
+    // rows (FBCL, cad) then both port huron rows (MDOT, usd). the site shows the
+    // operator's source link once per group.
     tolls: {
       rows: [
         {
@@ -129,16 +132,16 @@ export const CROSSING_INFO = {
           source: 'https://bluewaterbridge.ca/toll-rates/',
         },
         {
-          label: 'car, to port huron', usd: 5.0, cad: null, // mdot posts usd only
-          note: 'edge pass account: $0.50 off',
-          as_of: '2026-07-07',
-          source: 'https://www.michigan.gov/mdot/programs/bridges-and-structures/blue-water-bridge/toll-rates',
-        },
-        {
           label: 'truck per axle, to sarnia', usd: null, cad: 7.0,
           note: 'with connexion pre-paid: $5.00 cad',
           as_of: '2026-07-07',
           source: 'https://bluewaterbridge.ca/toll-rates/',
+        },
+        {
+          label: 'car, to port huron', usd: 5.0, cad: null, // mdot posts usd only
+          note: 'edge pass account: $0.50 off',
+          as_of: '2026-07-07',
+          source: 'https://www.michigan.gov/mdot/programs/bridges-and-structures/blue-water-bridge/toll-rates',
         },
         {
           label: 'truck per axle, to port huron', usd: 5.25, cad: null,
