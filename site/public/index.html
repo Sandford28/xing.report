@@ -102,6 +102,7 @@
   --cobalt: #0033FF;
   --volt: #E1FF00;              /* the one structural highlight — the "fastest" box */
   --muted: #7C7C74;
+  --hair: #DAD9D2;             /* hairline divider between reference-fact sections */
   --moving: #00A355;           /* moving = green word, never a fill */
   --slow-fill: #FFC200;   --slow-text: #050505;
   --backed-fill: #FF2A00; --backed-text: #F4F4F0;
@@ -115,6 +116,7 @@
     --cobalt: #4D75FF;
     --volt: #E1FF00;
     --muted: #8C8C84;
+    --hair: #2A2A28;
     --moving: #33D17A;
     --slow-fill: #FFC200;   --slow-text: #050505;
     --backed-fill: #FF2A00; --backed-text: #F4F4F0;
@@ -227,6 +229,18 @@ header {
 }
 /* where a crossing is, when it isn't obvious (blue water) */
 .place { color: var(--muted); padding: 0 16px 8px; }
+/* maps: a deliberate wayfinding button, not a weak hyperlink — bold in a hard-edged
+   ink box like the tap-to-call/toggle affordances, glove-sized, fills on press.
+   ink border (cobalt stays the wordmark's alone). */
+.card-actions { padding: 0 16px 12px; }
+.map-link {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 8px 16px; box-sizing: border-box;
+  border: 3px solid var(--ink); color: var(--ink);
+  font-weight: 700; text-decoration: none; letter-spacing: -0.01em;
+}
+.map-link .ext { font-weight: 400; }
+.map-link:hover, .map-link:active { background: var(--ink); color: var(--paper); }
 
 .lane-label {
   display: flex; align-items: center; gap: 8px; padding: 0 16px;
@@ -328,21 +342,31 @@ details.fold { border: 4px solid var(--ink); }
 
 /* hand-maintained facts: tolls, hazmat */
 .facts { font-size: 17px; line-height: 24px; padding: 0 16px 16px; }
+/* section labels read as headers — ink + bold, each block fenced off by a
+   hairline so tolls / hours / limits / hazmat are four clear chunks, not one
+   grey column. */
 .facts .label {
   font-size: 13px; line-height: 16px; letter-spacing: 0.08em;
-  color: var(--muted); margin-bottom: 8px;
+  font-weight: 700; color: var(--ink); margin-bottom: 10px;
 }
-.facts .label:not(:first-child) { margin-top: 20px; }
+.facts .label:not(:first-child) {
+  margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--hair);
+}
 .facts .as-of { font-size: 13px; line-height: 16px; margin-top: 4px; }
 .facts .unverified { color: var(--muted); }
 .fact-main { font-weight: 700; }
 /* links carry the context — ink + underline (cobalt stays unique to the wordmark),
    open in a new tab. the ↗ marks an off-site source. */
 .facts a { color: var(--ink); text-decoration: underline; }
+/* each toll is one price→detail cluster: the row's fine print hugs its price,
+   and clusters sit apart from each other so the list reads as distinct fares. */
+.facts .toll { margin-top: 12px; }
 .toll-row {
   display: flex; justify-content: space-between; align-items: baseline;
-  gap: 12px; flex-wrap: wrap; margin-top: 10px;
+  gap: 12px; flex-wrap: wrap;
 }
+.facts .toll-foot { margin-top: 12px; }
+.facts .toll-foot .as-of { margin-top: 0; }
 .toll-row .toll-label { color: var(--ink); }
 .toll-row .toll-price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* the posted price is the real one and leads; a converted currency is our
@@ -557,6 +581,21 @@ const HERO_LANE_LABEL = { truck: 'truck wait', car: 'car wait' };
 // the two crossings a detroit–windsor driver actually chooses between
 const COMPARE_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
 const SHORT_NAME = { 'ambassador-bridge': 'ambassador', 'detroit-windsor-tunnel': 'tunnel' };
+// google maps location by crossing — well-known landmark names (not guessed
+// coordinates), so google resolves each to the right place and a driver's app
+// routes from wherever they are. opens the location pin, not turn-by-turn.
+const MAPS_QUERY = {
+  'ambassador-bridge': 'Ambassador Bridge, Detroit',
+  'detroit-windsor-tunnel': 'Detroit-Windsor Tunnel',
+  'blue-water-bridge': 'Blue Water Bridge, Port Huron',
+  'gordie-howe-bridge': 'Gordie Howe International Bridge',
+};
+function mapsLink(slug) {
+  const q = MAPS_QUERY[slug];
+  return q
+    ? `<a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}" target="_blank" rel="noopener">open in maps <span class="ext" aria-hidden="true">↗</span></a>`
+    : '';
+}
 // the tunnel's freight limit is HEIGHT, not size: it takes 45′/48′ trailers and
 // multi-axle flatbeds, but only under 12′8″ tall / 8′6″ wide — so a standard
 // 13′6″ trailer (most freight) can't clear it. safety-critical for a trucker, so
@@ -592,7 +631,7 @@ function fromUrl() {
 }
 const urlSel = fromUrl();
 let direction = urlSel.dir || recall('xing-direction', ['to_canada', 'to_us'], 'to_canada');
-let mode = urlSel.veh || recall('xing-mode', ['truck', 'car'], 'truck');
+let mode = urlSel.veh || recall('xing-mode', ['truck', 'car'], 'car');
 if (urlSel.dir) remember('xing-direction', urlSel.dir);
 if (urlSel.veh) remember('xing-mode', urlSel.veh);
 
@@ -809,13 +848,13 @@ function factsHtml(info, slug) {
       anyEstimate = anyEstimate || estimated;
       const link = r.source && r.source !== lastSrc ? srcLink(r.source) : '';
       lastSrc = r.source || lastSrc;
-      rows += `<div class="toll-row"><span class="toll-label">${r.label}</span><span class="toll-price">${price}</span></div>`;
-      rows += fine([r.note, oneDate ? '' : (r.as_of ? `posted ${shortDate(r.as_of)}` : ''), link]);
+      const note = fine([r.note, oneDate ? '' : (r.as_of ? `posted ${shortDate(r.as_of)}` : ''), link]);
+      rows += `<div class="toll"><div class="toll-row"><span class="toll-label">${r.label}</span><span class="toll-price">${price}</span></div>${note}</div>`;
     }
     const foot = [];
     if (oneDate) foot.push(`posted ${shortDate(oneDate)}`);
     if (anyEstimate && data.usd_cad) foot.push(`≈ = ${srcLink(BOC_URL, 'bank of canada')} rate ${shortDate(data.usd_cad.date)}, not a posted price`);
-    rows += fine(foot);
+    if (foot.length) rows += `<div class="toll-foot">${fine(foot)}</div>`;
   }
   if (info.hours) {
     rows += `<div class="label">hours</div>`;
@@ -964,8 +1003,10 @@ function cardHtml(crossing, fastestSlug) {
 
   const s = heroLane ? signalOf(heroLane) : null;
   const tag = crossing.slug === fastestSlug ? `<span class="tag-fastest">fastest</span>` : '';
-  const place = crossing.info && crossing.info.place
+  const placeText = crossing.info && crossing.info.place
     ? `<div class="place">${crossing.info.place}</div>` : '';
+  const mb = mapsLink(crossing.slug);
+  const place = placeText + (mb ? `<div class="card-actions">${mb}</div>` : '');
 
   let hero = '';
   if (heroLane) {
@@ -1044,6 +1085,7 @@ function gordieFoldHtml(g) {
       <div class="status-headline">${g.status.headline}</div>
       <div class="status-note">${g.status.note}</div>
       <div class="as-of">as of ${shortDate(g.status.as_of)}</div>
+      <div style="margin-top:8px">${mapsLink('gordie-howe-bridge')}</div>
       <hr class="rule">
       <div class="facts" style="padding:0">${hazmatLine(g.hazmat)}</div>
       <hr class="rule">
