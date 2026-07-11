@@ -381,20 +381,23 @@ details.fold { border: 4px solid var(--ink); }
 /* links carry the context — ink + underline (cobalt stays unique to the wordmark),
    open in a new tab. the ↗ marks an off-site source. */
 .facts a { color: var(--ink); text-decoration: underline; }
-/* each toll is one price→detail cluster: the row's fine print hugs its price,
-   and clusters sit apart from each other so the list reads as distinct fares. */
-.facts .toll { margin-top: 12px; }
-.toll-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  gap: 12px; flex-wrap: wrap;
-}
+/* tolls read as a two-column table: fare class on the left, the price(s) on the
+   right in a hard tabular column. a hairline fences each fare from the next so
+   the list scans top-to-bottom like a rate card, not a paragraph of prices. */
+.tolls { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.tolls td { padding: 10px 0; vertical-align: top; border-top: 1px solid var(--hair); }
+.tolls tr:first-child td { border-top: none; padding-top: 2px; }
+.t-cls { font-weight: 700; padding-right: 14px; }
+/* the fare's fine print (discount, source link, per-row date) hangs under its
+   label so it never crowds the price column */
+.t-note { display: block; font-weight: 400; font-size: 13px; line-height: 17px; color: var(--muted); margin-top: 4px; }
+.t-amt { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* the posted currency leads in ink; a converted currency is our estimate and
+   recedes (regular weight, muted) so the two never look like competing prices */
+.t-amt .amt-line { display: block; font-weight: 700; }
+.t-amt .amt-line.est { font-weight: 400; color: var(--muted); }
 .facts .toll-foot { margin-top: 12px; }
 .facts .toll-foot .as-of { margin-top: 0; }
-.toll-row .toll-label { color: var(--ink); }
-.toll-row .toll-price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-/* the posted price is the real one and leads; a converted currency is our
-   estimate and recedes so the row reads as one number, not two competing ones. */
-.toll-price .est { font-weight: 400; color: var(--muted); }
 .call {
   display: flex; align-items: center; justify-content: center;
   min-height: 56px; margin-top: 8px;
@@ -535,8 +538,8 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
     </button>
   </nav>
   <nav class="toggle" aria-label="vehicle">
-    <button id="btn-truck" aria-pressed="true">truck</button>
-    <button id="btn-car" aria-pressed="false">car</button>
+    <button id="btn-car" aria-pressed="true">car</button>
+    <button id="btn-truck" aria-pressed="false">truck</button>
   </nav>
   <div id="cards"><div class="fresh">loading…</div></div>
   <!-- rendered once, outside the 30s re-render, so typing in the signup
@@ -835,18 +838,19 @@ function fine(parts) {
 }
 
 // tolls: the operator's real posted price leads; a currency the operator doesn't
-// post is our estimate at the bank of canada rate — shown muted and marked "≈".
-// returns [priceHtml, usedEstimate].
-function tollPrice(row) {
-  const parts = [];
+// post is our estimate at the bank of canada rate — marked "≈" and shown muted.
+// usd always sits above cad so the price column stays aligned row to row.
+// returns { lines: [{ text, est }], estimated }.
+function tollAmounts(row) {
+  const lines = [];
   let estimated = false;
   const hasUsd = row.usd !== null && row.usd !== undefined;
   const hasCad = row.cad !== null && row.cad !== undefined;
-  if (hasUsd) parts.push(`${money(row.usd)} usd`);
-  else if (hasCad && data.usd_cad) { parts.push(`<span class="est">≈${money(row.cad / data.usd_cad.rate)} usd</span>`); estimated = true; }
-  if (hasCad) parts.push(`${money(row.cad)} cad`);
-  else if (hasUsd && data.usd_cad) { parts.push(`<span class="est">≈${money(row.usd * data.usd_cad.rate)} cad</span>`); estimated = true; }
-  return [parts.join(' · '), estimated];
+  if (hasUsd) lines.push({ text: `${money(row.usd)} usd`, est: false });
+  else if (hasCad && data.usd_cad) { lines.push({ text: `≈${money(row.cad / data.usd_cad.rate)} usd`, est: true }); estimated = true; }
+  if (hasCad) lines.push({ text: `${money(row.cad)} cad`, est: false });
+  else if (hasUsd && data.usd_cad) { lines.push({ text: `≈${money(row.usd * data.usd_cad.rate)} cad`, est: true }); estimated = true; }
+  return { lines, estimated };
 }
 
 // short detail lines plus a glove-sized tap-to-call button — shared by
@@ -879,14 +883,18 @@ function factsHtml(info, slug) {
     const dates = info.tolls.rows.map((r) => r.as_of).filter(Boolean);
     const oneDate = dates.length && dates.every((d) => d === dates[0]) ? dates[0] : null;
     let lastSrc = null; // the operator link shows once, on the first row it applies to
+    let body = '';
     for (const r of info.tolls.rows) {
-      const [price, estimated] = tollPrice(r);
+      const { lines, estimated } = tollAmounts(r);
       anyEstimate = anyEstimate || estimated;
       const link = r.source && r.source !== lastSrc ? srcLink(r.source) : '';
       lastSrc = r.source || lastSrc;
-      const note = fine([r.note, oneDate ? '' : (r.as_of ? `posted ${shortDate(r.as_of)}` : ''), link]);
-      rows += `<div class="toll"><div class="toll-row"><span class="toll-label">${r.label}</span><span class="toll-price">${price}</span></div>${note}</div>`;
+      const noteParts = [r.note, oneDate ? '' : (r.as_of ? `posted ${shortDate(r.as_of)}` : ''), link].filter(Boolean);
+      const note = noteParts.length ? `<span class="t-note">${noteParts.join(' · ')}</span>` : '';
+      const amt = lines.map((l) => `<span class="amt-line${l.est ? ' est' : ''}">${l.text}</span>`).join('');
+      body += `<tr><td class="t-cls">${r.label}${note}</td><td class="t-amt">${amt}</td></tr>`;
     }
+    rows += `<table class="tolls"><tbody>${body}</tbody></table>`;
     const foot = [];
     if (oneDate) foot.push(`posted ${shortDate(oneDate)}`);
     if (anyEstimate && data.usd_cad) foot.push(`≈ = ${srcLink(BOC_URL, 'bank of canada')} rate ${shortDate(data.usd_cad.date)}, not a posted price`);
