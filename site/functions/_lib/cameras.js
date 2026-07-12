@@ -42,8 +42,13 @@ export const CAMERAS = {
   },
   'detroit-windsor-tunnel': {
     to_canada: {
-      image: 'https://micamerasimages.net/thumbs/semtoc_cam_251.flv.jpg?item=1',
-      where: 'tunnel entrance · detroit',
+      // cam_251 (jefferson @ randolph, right at the tunnel mouth) went dark and
+      // serves mdot's 1920×1080 "stream not available" placeholder. swapped to the
+      // nearest live mdot cam up the jefferson approach (~0.2 mi west); re-verified
+      // a live 352×240 frame 2026-07-11. same free mdot feed. if cam_251 comes back
+      // it's the closer shot — revert then.
+      image: 'https://micamerasimages.net/thumbs/semtoc_cam_002.flv.jpg?item=1',
+      where: 'jefferson ave at woodward · detroit',
       ...MDOT,
     },
     to_us: {
