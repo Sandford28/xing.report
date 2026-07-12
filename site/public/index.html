@@ -176,12 +176,12 @@ header { background: #050505; border-bottom: 2px solid transparent; }
 .corridor { display: flex; align-items: center; gap: 7px; flex: none; }
 .corridor .fl { display: block; flex: none; }
 .corridor .swap { color: #F4F4F0; font-weight: 900; font-size: 16px; }
-/* row 2 — the volt "what this is" chip, and our own freshness clock */
+/* row 2 — the "what this is" tagline, and our own freshness clock */
 .header-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.tagchip {
-  background: #E1FF00; color: #050505; font-weight: 900;
-  font-size: 13px; letter-spacing: 0.03em; padding: 6px 10px;
-}
+/* a quiet legend, NOT a highlight: the one volt fill on the page is reserved for
+   the fastest box (the actual answer). the slogan is secondary, so it's plain
+   paper text and never competes with the live number below it. */
+.tagline { font-size: 13px; font-weight: 700; letter-spacing: 0.03em; color: #F4F4F0; }
 .checked { font-size: 13px; color: #8C8C84; white-space: nowrap; }
 
 /* ============ stale warning strip — §5 ============ */
@@ -509,7 +509,7 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
       </span>
     </div>
     <div class="header-foot">
-      <span class="tagchip">live border waits · det ↔ win</span>
+      <span class="tagline">live border waits · det ↔ win</span>
       <span class="checked" id="checked"></span>
     </div>
   </div>
