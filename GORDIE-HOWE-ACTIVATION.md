@@ -32,6 +32,22 @@ Howe is built to carry hazmat, but confirm the current rule against WDBA /
 MDOT guidance and record the date. Also gather: toll rates (both currencies if
 the operator posts both), hours, height/weight limits, and the WDBA camera URLs.
 
+**What the official opening release already confirms** (canada.ca, Housing,
+Infrastructure and Communities Canada, dated 2026-07-10 — the source cited in
+the site's gordie status):
+- A **full opening on July 27** — a six-lane cable-stayed bridge (853 m main
+  span), modern ports of entry both sides, serving "commuters, tourists, and
+  businesses" (i.e. cars **and** trucks). No phased or one-direction opening is
+  mentioned.
+- **Tolls will apply** — it is not free-to-start. The release describes toll
+  governance, a 15-year economic-development fund tied to a portion of bridge
+  profits, and the **Windsor-Detroit Bridge Authority (WDBA) setting the toll
+  rates** (with U.S. concurrence for certain non-market changes).
+- It does **not** publish the actual toll rates, the hazmat rule, height/weight
+  limits, hours, or the opening time of day — so all of those still need
+  hand-verification against WDBA at opening. Start at the operator site (the
+  release's "Associated links" points to the Gordie Howe official website).
+
 ---
 
 ## 2 · Activate in the database (no deploy needed)
