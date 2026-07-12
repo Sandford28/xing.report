@@ -79,7 +79,8 @@ export const CROSSING_INFO = {
       headline: 'opens july 27, 2026',
       note: 'construction is complete. after the june 12 ceremony was called off, canada and michigan announced july 27, 2026 as the opening date. we’ll email the list the day it opens.',
       as_of: '2026-07-11',
-      source: 'https://gordiehoweinternationalbridge.com/the-gordie-howe-international-bridge-will-open-on-july-27/',
+      // official federal release (housing, infrastructure and communities canada)
+      source: 'https://www.canada.ca/en/housing-infrastructure-communities/news/2026/07/the-gordie-howe-international-bridge-will-open-on-july-27th-strengthening-trade-connectivity-and-economic-development.html',
     },
     tolls: null,             // to be posted by the operator at opening
     hazmat: {

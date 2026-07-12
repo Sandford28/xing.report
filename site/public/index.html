@@ -1143,7 +1143,7 @@ function gordieFoldHtml(g) {
     <div class="fold-body">
       <div class="status-headline">${g.status.headline}</div>
       <div class="status-note">${g.status.note}</div>
-      <div class="as-of">as of ${shortDate(g.status.as_of)}</div>
+      <div class="as-of">as of ${shortDate(g.status.as_of)}${g.status.source ? ` · ${srcLink(g.status.source)}` : ''}</div>
       <div style="margin-top:8px">${mapsLink('gordie-howe-bridge')}</div>
       <hr class="rule">
       <div class="facts" style="padding:0">${hazmatLine(g.hazmat)}</div>
