@@ -15,7 +15,7 @@ Changelog:
 - v1.6 — approach cameras, one curated still per crossing behind a tap (§5, §7).
 - **v2.0 — high-vis industrial system.** New palette (whiter paper, blacker ink, cobalt, one acid-volt highlight); 4px ink grid; 112px/900 hero numeral; three weights (400/700/900); the verdict becomes the acid-volt **fastest box**; the separate comparison board is retired — the detail cards *are* the comparison, ordered fastest-first; alerts render UPPERCASE on the grid; a global "checked n min ago" sits in the header while each card carries the border's own "reported {clock}"; night mode is a strict 1:1 inversion. Everything from v1.x (toggles, charts, cameras, folds, tolls, signup, sources, all honesty logic) is retained under the new skin.
 - **v2.1 — the mark (§8).** Adopted the CI manual's jeweled-junction ✕ (concept b): the plain crossed-bars mark gains a volt jewel set in the joint. Replaces the header mark, the SVG favicon, and the 192/512 PWA tiles from one drawing. Imported from Claude Design file `xing.report CI manual.dc.html`.
-- **v2.2 — Univers prepared, on hold (§2).** Built and proved a full Univers implementation (self-hosted subset woff2, provided by Mark; text 400/700, hero in Univers Condensed Bold) but **deferred it from production pending web-embedding licensing** — prod continues on Helvetica. The mark, toggles, and tolls work below shipped without it.
+- **v2.2 — Univers evaluated, then declined (§2).** Built and proved a full Univers implementation (self-hosted subset woff2; text 400/700, hero in Univers Condensed Bold) but **chose not to license the commercial face** — production commits to Helvetica, and the font work was removed from the shipped tree. Decision final 2026-07-11. The mark, toggles, and tolls work below shipped independently.
 - **v2.2 — the mark, clearer toggles, decluttered tolls.** Shipped to prod: the jeweled-junction mark (§8) as header/favicon/PWA tiles; the toggle selected-state fix + direction flags (§5); and the tolls-fold declutter with per-operator source links (§5).
 
 ---
@@ -76,7 +76,7 @@ Rules: 22×14 viewBox, white field, 1px ink hairline border so they sit crisply 
 - **Family:** `"Helvetica Neue", Helvetica, Arial, sans-serif`.
 - **Weights:** 400, 700, 900. No others. No italics, ever.
 - **Case:** everything lowercase — **except emergency alert banners, which are UPPERCASE.**
-- **Univers is the intended face** — the wayfinding tradition this system is drawn on — and a full implementation (subset self-hosted woff2, `--font-sans`/`--font-cond`, hero in Univers Condensed Bold) is prepared and proven on preview. It is **on hold pending web-embedding licensing** (Univers is a commercial typeface); production ships Helvetica until that clears. Re-enabling is a one-step swap — recipe in the project memory, font files backed up.
+- **Helvetica is the face — final.** A full Univers implementation was built and proven on preview, but it was **declined** (2026-07-11) rather than take on commercial web-embedding licensing. The Helvetica/Arial stack is the system's typeface, not a placeholder. Two weights carry everything (three counting 900); the wayfinding character comes from weight, spacing, and case, not the specific face.
 
 | role | size / line | weight | notes |
 |---|---|---|---|
