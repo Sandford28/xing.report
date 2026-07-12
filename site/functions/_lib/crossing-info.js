@@ -3,6 +3,10 @@
 // listed in `source`, and never scraped. Every block carries the date it
 // was last checked (as_of / last_verified) — the page always shows it.
 //
+// Every toll row carries `veh: 'car' | 'truck'` — the site shows only the fares
+// (and, for trucks, the size limits + hazmat rules) that apply to the vehicle
+// the visitor has selected. Oversize/over-height fares are truck fares.
+//
 // PRICING RULE: show the operator's real posted prices wherever they exist
 // (fill both usd and cad when the operator posts both); only calculate a
 // currency when the operator doesn't give one (leave it null), and the page
@@ -20,18 +24,18 @@ export const CROSSING_INFO = {
     tolls: {
       rows: [
         {
-          label: 'car', usd: 10.0, cad: 14.0, // both posted by the operator
+          veh: 'car', label: 'car', usd: 10.0, cad: 14.0, // both posted by the operator
           as_of: '2026-04-19',
           source: 'https://www.ambassadorbridge.com/auto-toll-rates/',
         },
         {
-          label: 'truck, per axle', usd: 20.0, cad: null, // operator posts USD only
+          veh: 'truck', label: 'truck, per axle', usd: 20.0, cad: null, // operator posts USD only
           note: 'with a-pass or e-zpass: $15.00 usd or less',
           as_of: '2026-03-15', // operator's posted effective date; re-verified unchanged 2026-07-07
           source: 'https://www.ambassadorbridge.com/commercial/commercial-toll-rates/',
         },
         {
-          label: 'oversize load', usd: 125.0, cad: 178.0, // both posted in the operator's faq
+          veh: 'truck', label: 'oversize load', usd: 125.0, cad: 178.0, // both posted in the operator's faq
           note: 'plus per-axle tolls · schedule ahead: (313) 989-0136',
           as_of: '2026-07-07',
           source: 'https://www.ambassadorbridge.com/faqs/',
@@ -88,12 +92,12 @@ export const CROSSING_INFO = {
     tolls: {
       rows: [
         {
-          label: 'car, to windsor', usd: 9.0, cad: null, // operator posts usd on the detroit side
+          veh: 'car', label: 'car, to windsor', usd: 9.0, cad: null, // operator posts usd on the detroit side
           as_of: '2026-07-07',
           source: 'https://www.dwtunnel.com/toll-rates/',
         },
         {
-          label: 'car, to detroit', usd: null, cad: 8.25, // operator posts cad on the windsor side
+          veh: 'car', label: 'car, to detroit', usd: null, cad: 8.25, // operator posts cad on the windsor side
           as_of: '2026-07-07',
           source: 'https://www.dwtunnel.com/toll-rates/',
         },
@@ -126,25 +130,25 @@ export const CROSSING_INFO = {
     tolls: {
       rows: [
         {
-          label: 'car, to sarnia', usd: null, cad: 7.0, // fbcl posts cad only
+          veh: 'car', label: 'car, to sarnia', usd: null, cad: 7.0, // fbcl posts cad only
           note: 'with connexion pre-paid: $4.50 cad',
           as_of: '2026-07-07',
           source: 'https://bluewaterbridge.ca/toll-rates/',
         },
         {
-          label: 'truck per axle, to sarnia', usd: null, cad: 7.0,
+          veh: 'truck', label: 'truck per axle, to sarnia', usd: null, cad: 7.0,
           note: 'with connexion pre-paid: $5.00 cad',
           as_of: '2026-07-07',
           source: 'https://bluewaterbridge.ca/toll-rates/',
         },
         {
-          label: 'car, to port huron', usd: 5.0, cad: null, // mdot posts usd only
+          veh: 'car', label: 'car, to port huron', usd: 5.0, cad: null, // mdot posts usd only
           note: 'edge pass account: $0.50 off',
           as_of: '2026-07-07',
           source: 'https://www.michigan.gov/mdot/programs/bridges-and-structures/blue-water-bridge/toll-rates',
         },
         {
-          label: 'truck per axle, to port huron', usd: 5.25, cad: null,
+          veh: 'truck', label: 'truck per axle, to port huron', usd: 5.25, cad: null,
           as_of: '2026-07-07',
           source: 'https://www.michigan.gov/mdot/programs/bridges-and-structures/blue-water-bridge/toll-rates',
         },

@@ -477,6 +477,10 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
   min-height: 120px; display: flex; align-items: center; justify-content: center;
 }
 .cam-img { display: block; width: 100%; height: auto; }
+/* the display:block above is an author rule, so it overrides the UA [hidden]
+   rule — without this, img.hidden can't hide a dead/placeholder frame and it
+   shows through behind "camera temporarily unavailable". */
+.cam-img[hidden] { display: none; }
 .cam-down { color: var(--muted); font-size: 15px; padding: 24px 16px; text-align: center; }
 .cam-cap { font-size: 13px; line-height: 16px; color: var(--muted); margin-top: 4px; }
 </style>
@@ -545,6 +549,9 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
   <!-- rendered once, outside the 30s re-render, so typing in the signup
        form is never wiped by a refresh -->
   <div id="gordie"></div>
+  <!-- blue water sits below gordie howe — a real diversion 60 mi north, but the
+       last option a detroit–windsor driver reaches for -->
+  <div id="bluewater"></div>
 </main>
 
 <!-- flags — the one sanctioned exception to "color means status only"
@@ -875,16 +882,20 @@ function hazmatLine(hazmat) {
 function factsHtml(info, slug) {
   if (!info) return '';
   let rows = '';
-  if (info.tolls) {
+  // show only what applies to the chosen vehicle: car → car fares; truck → truck
+  // fares plus the size limits and hazmat rules (both freight concerns). hours
+  // are universal, shown either way.
+  const tollRows = info.tolls ? info.tolls.rows.filter((r) => r.veh === mode) : [];
+  if (tollRows.length) {
     rows += `<div class="label">tolls</div>`;
     let anyEstimate = false;
     // one shared "posted" date collapses to a single footnote; per-row dates
     // stay only when the rows genuinely differ, so the list isn't a wall of dates.
-    const dates = info.tolls.rows.map((r) => r.as_of).filter(Boolean);
+    const dates = tollRows.map((r) => r.as_of).filter(Boolean);
     const oneDate = dates.length && dates.every((d) => d === dates[0]) ? dates[0] : null;
     let lastSrc = null; // the operator link shows once, on the first row it applies to
     let body = '';
-    for (const r of info.tolls.rows) {
+    for (const r of tollRows) {
       const { lines, estimated } = tollAmounts(r);
       anyEstimate = anyEstimate || estimated;
       const link = r.source && r.source !== lastSrc ? srcLink(r.source) : '';
@@ -905,14 +916,18 @@ function factsHtml(info, slug) {
     rows += `<div class="fact-main">${info.hours.text}</div>`;
     rows += fine([`checked ${shortDate(info.hours.as_of)}`, srcLink(info.hours.source)]);
   }
-  if (info.limits) {
+  // limits (height/weight/oversize) and hazmat are freight rules — trucks only
+  if (mode === 'truck' && info.limits) {
     rows += `<div class="label">limits</div>`;
     rows += `<div class="fact-main">${info.limits.text}</div>${factLines(info.limits)}`;
     rows += fine([`checked ${shortDate(info.limits.as_of)}`, srcLink(info.limits.source)]);
   }
-  rows += hazmatLine(info.hazmat);
+  if (mode === 'truck') rows += hazmatLine(info.hazmat);
+  if (!rows) return ''; // nothing applies to this vehicle at this crossing
+  // "tolls & rules" when there are rules to show (truck), just "tolls" for cars
+  const summary = mode === 'truck' ? 'tolls &amp; rules' : 'tolls';
   return `<details class="more" data-slug="${slug}">
-    <summary>tolls &amp; rules</summary>
+    <summary>${summary}</summary>
     <div class="facts">${rows}</div>
   </details>`;
 }
@@ -1208,9 +1223,12 @@ function render() {
   document.getElementById('fastest').innerHTML = fastestBoxHtml();
 
   const cardsEl = document.getElementById('cards');
-  // re-rendering must not snap an open panel shut while it's being read
+  const bwEl = document.getElementById('bluewater');
+  // re-rendering must not snap an open panel shut while it's being read — track
+  // both blocks (blue water renders separately so gordie can sit above it)
   const openMore = new Set(
-    Array.from(cardsEl.querySelectorAll('details[open]')).map((d) => d.dataset.slug)
+    [...cardsEl.querySelectorAll('details[open]'), ...bwEl.querySelectorAll('details[open]')]
+      .map((d) => d.dataset.slug)
   );
   // fastest first; the winner wears the tag. crossings without a live number sink.
   const open = comparable();
@@ -1222,8 +1240,11 @@ function render() {
     .sort((a, b) => (rank.has(a.slug) ? rank.get(a.slug) : 99) - (rank.has(b.slug) ? rank.get(b.slug) : 99))
     .map((c) => cardHtml(c, fastestSlug))
     .join('');
-  cardsEl.innerHTML = (detailCards || '<div class="fresh">no data available</div>') + blueWaterFoldHtml();
-  for (const d of cardsEl.querySelectorAll('details')) d.open = openMore.has(d.dataset.slug);
+  cardsEl.innerHTML = detailCards || '<div class="fresh">no data available</div>';
+  bwEl.innerHTML = blueWaterFoldHtml();
+  for (const d of [...cardsEl.querySelectorAll('details'), ...bwEl.querySelectorAll('details')]) {
+    d.open = openMore.has(d.dataset.slug);
+  }
   bindCameras();
 
   // global freshness in the header — how long since OUR pipeline last landed a
