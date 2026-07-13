@@ -19,7 +19,7 @@ Two bridges are compared: the **Gordie Howe International Bridge** and the **Amb
 
 Build only the current phase. Do not build ahead.
 
-- **Phase 0 (now):** Live Ambassador Bridge wait times + approach-road alerts + tolls, plus a "Gordie Howe status" section (is it open yet?). An email signup: "Get one email when the bridge opens." **The data archive must be recording from the very first deploy** — see below.
+- **Phase 0 (now):** Live Ambassador Bridge wait times + approach-road alerts + tolls, plus a "Gordie Howe status" section (is it open yet?). **The data archive must be recording from the very first deploy** — see below.
 - **Phase 1 (bridge opens):** Turn on the full two-bridge comparison.
 - **Phase 2 (later):** A directory of customs brokers, carriers, warehouses.
 - **Phase 3 (only if traffic justifies):** A freight-matching board.

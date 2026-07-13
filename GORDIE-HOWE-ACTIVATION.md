@@ -90,8 +90,8 @@ looked at it):
   - Add to `SHORT_NAME`: `'gordie-howe-bridge': 'gordie howe'` (the fastest box).
   - Add to `SIDE_LABELS`: `'gordie-howe-bridge': { ca: 'windsor', us: 'detroit' }`.
   - Retire the "not open yet" fold: the `gordieFoldHtml` + `#gordie` status
-    section and its email signup have done their job — remove them (or keep a
-    one-line "now open" note briefly). The crossing now renders as a normal card.
+    section has done its job — remove it (or keep a one-line "now open" note
+    briefly). The crossing now renders as a normal card.
 - **`functions/_lib/crossing-info.js`** — add a `'gordie-howe-bridge'` block:
   `tolls`, `hours`, `limits`, and the **verified** `hazmat` (with `last_verified`).
   Remove the old `.status` block (the status fold is gone).
@@ -104,24 +104,7 @@ Deploy to preview, check it, then to prod (same commands as the reskin ship).
 
 ---
 
-## 4 · Email the "one email when it opens" list
-
-The signup has been collecting addresses in the `subscribers` table from day one.
-**Heads-up: a send path is not built yet** — Phase 0 only *collects*. When ready
-to notify, options: a one-off Worker using an email API (e.g. MailChannels /
-Resend), or export and send. Export the list:
-
-```
-cd collector
-node_modules/.bin/wrangler d1 execute xing-report --remote --json --command \
-"SELECT email FROM subscribers WHERE unsubscribed_at IS NULL ORDER BY created_at;"
-```
-
-Keep the promise literally: **one** email, "the bridge is open," nothing else.
-
----
-
-## 5 · Housekeeping
+## 4 · Housekeeping
 
 - This is the **Phase 0 → Phase 1** milestone (CLAUDE.md): the full two/three-way
   comparison is now live. Update CLAUDE.md's phase note and DESIGN-SPEC if the

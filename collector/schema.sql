@@ -109,14 +109,6 @@ CREATE TABLE IF NOT EXISTS analytics (
   PRIMARY KEY (day, metric, key)
 );
 
--- "Get one email when the bridge opens." Stored here, no third-party service.
-CREATE TABLE IF NOT EXISTS subscribers (
-  id INTEGER PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  created_at TEXT NOT NULL,
-  unsubscribed_at TEXT
-);
-
 -- The crossings we launch with. Tunnel and Blue Water are archived from day one
 -- (the archive cannot be backfilled); Gordie Howe activates when its feed appears.
 INSERT OR IGNORE INTO crossings (id, slug, name, cbp_port_name, cbp_crossing_name, cbsa_office_name, active) VALUES
