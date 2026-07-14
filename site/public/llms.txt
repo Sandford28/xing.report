@@ -5,13 +5,13 @@
 ## What it is
 - Live wait times for two Detroit–Windsor crossings, compared side by side, in both directions (Detroit → Windsor and Windsor → Detroit), for trucks (commercial lanes) and cars (passenger lanes).
 - Updated every 5 minutes. If a reading is more than 10 minutes old, the site says so rather than showing a stale number.
-- No accounts, no ads, no tracking.
+- No accounts, no ads, no cookies, no cross-site tracking — privacy-first, anonymous analytics only.
 
 ## Crossings
 - Ambassador Bridge (Detroit–Windsor) — trucks and cars.
 - Detroit–Windsor Tunnel — cars, plus low-profile trucks only (max 12 ft 8 in tall / 8 ft 6 in wide, no hazmat placards). Standard 13 ft 6 in trailers can't clear it, so it is never named the fastest freight crossing.
 - Blue Water Bridge (Port Huron–Sarnia, ~60 miles north) — shown as a diversion option.
-- Gordie Howe International Bridge — not open yet; the site tracks its status and offers one email when it opens.
+- Gordie Howe International Bridge — not open yet; the site tracks its status and shows it the day it opens.
 
 ## Data sources (all free, public, government)
 - U.S. Customs and Border Protection (CBP) — wait times into the U.S.
