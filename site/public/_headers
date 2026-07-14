@@ -10,6 +10,13 @@
   Content-Type: text/plain; charset=utf-8
 /llms.txt
   Content-Type: text/plain; charset=utf-8
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+/openapi.json
+  Content-Type: application/json; charset=utf-8
+  Cache-Control: public, max-age=86400
+# note: CORS for /api/now and /api/patterns is set inside those Functions
+# (functions/api/*.js) — Cloudflare does not apply _headers to Function routes.
 /icon-192.png
   Cache-Control: public, max-age=604800
 /icon-512.png

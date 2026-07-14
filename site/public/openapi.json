@@ -1,0 +1,208 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xing.report public data API",
+    "version": "1.0.0",
+    "description": "Free, read-only border-crossing data for the Detroit–Windsor corridor (Ambassador Bridge and Detroit–Windsor Tunnel), commercial (truck) and passenger (car) lanes, both directions. Live readings are taken every five minutes from U.S. Customs and Border Protection (into the U.S.) and the Canada Border Services Agency (into Canada). Free to use under CC BY 4.0 with attribution to xing.report.",
+    "termsOfService": "https://xing.report/llms.txt",
+    "license": {
+      "name": "CC BY 4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "contact": { "name": "xing.report", "url": "https://xing.report/" }
+  },
+  "servers": [{ "url": "https://xing.report", "description": "production" }],
+  "paths": {
+    "/api/now": {
+      "get": {
+        "operationId": "getCurrentWaitTimes",
+        "summary": "Current wait times, trends, alerts, tolls and exchange rate for every active crossing",
+        "description": "Returns the latest reading for every lane of every active crossing, plus a plain-word trend, active approach-road alerts, hand-verified facts (tolls, hazmat, hours), and the official Bank of Canada USD/CAD rate. If a feed has been down, the last known reading is returned; use the fetched_at timestamp to judge freshness (readings older than ~10 minutes should be treated as stale).",
+        "responses": {
+          "200": {
+            "description": "The current snapshot.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NowResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns": {
+      "get": {
+        "operationId": "getTypicalWaitByHour",
+        "summary": "Typical wait by hour of day, built from the permanent archive",
+        "description": "Returns the average wait for each crossing, direction and vehicle, by local hour of day (America/Detroit), over a 90-day lookback. Only populated once the archive holds at least 7 days of history; until then, ready is false and crossings is empty.",
+        "responses": {
+          "200": {
+            "description": "Hour-of-day averages, or a not-ready marker.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PatternsResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Direction": {
+        "type": "string",
+        "enum": ["to_canada", "to_us"],
+        "description": "to_canada = Detroit → Windsor; to_us = Windsor → Detroit."
+      },
+      "Reading": {
+        "type": "object",
+        "description": "The latest reading for one lane.",
+        "properties": {
+          "direction": { "$ref": "#/components/schemas/Direction" },
+          "lane_category": {
+            "type": "string",
+            "enum": ["commercial", "passenger"],
+            "description": "commercial = trucks; passenger = cars."
+          },
+          "lane_type": {
+            "type": "string",
+            "description": "Lane program, e.g. 'standard' or 'nexus' (trusted traveler)."
+          },
+          "wait_minutes": {
+            "type": ["integer", "null"],
+            "description": "Reported wait in minutes; null if the lane is closed or has no reading."
+          },
+          "status_text": {
+            "type": ["string", "null"],
+            "description": "The source agency's own status word for the lane."
+          },
+          "lanes_open": { "type": ["integer", "null"] },
+          "max_lanes": { "type": ["integer", "null"] },
+          "feed_updated_at": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "When the source agency says the reading was taken."
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When xing.report fetched it. Use this to judge staleness."
+          },
+          "source": { "type": "string", "description": "Originating feed, e.g. 'cbp' or 'cbsa'." },
+          "trend": {
+            "type": "string",
+            "enum": ["climbing", "steady", "easing"],
+            "description": "Plain-word trend over the last 15–40 minutes; never blank."
+          }
+        }
+      },
+      "Alert": {
+        "type": "object",
+        "description": "An active approach-road or weather alert affecting a crossing.",
+        "properties": {
+          "source": { "type": "string" },
+          "side": { "type": ["string", "null"], "description": "'us' or 'ca'." },
+          "event_type": { "type": "string" },
+          "title": { "type": ["string", "null"] },
+          "description": { "type": ["string", "null"] },
+          "roadway": { "type": ["string", "null"] },
+          "direction_of_travel": { "type": ["string", "null"] },
+          "lanes_affected": { "type": ["string", "null"] },
+          "is_full_closure": { "type": ["integer", "boolean", "null"] },
+          "severity": { "type": ["string", "null"] },
+          "reported_at": { "type": ["string", "null"], "format": "date-time" },
+          "first_seen_at": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "Crossing": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Stable id, e.g. 'ambassador-bridge', 'detroit-windsor-tunnel'."
+          },
+          "name": { "type": "string" },
+          "info": {
+            "type": ["object", "null"],
+            "description": "Hand-verified facts: tolls, size limits, hazmat rules, hours. Each carries the date it was last verified and its official source. Never inferred or scraped."
+          },
+          "cameras": { "type": ["array", "null"], "items": { "type": "object" } },
+          "readings": { "type": "array", "items": { "$ref": "#/components/schemas/Reading" } },
+          "alerts": { "type": "array", "items": { "$ref": "#/components/schemas/Alert" } }
+        }
+      },
+      "NowResponse": {
+        "type": "object",
+        "properties": {
+          "generated_at": { "type": "string", "format": "date-time" },
+          "alerts_checked_at": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "When alert collection last succeeded; null means alert status is unknown, not 'no alerts'."
+          },
+          "usd_cad": {
+            "type": ["object", "null"],
+            "description": "Official Bank of Canada USD/CAD rate.",
+            "properties": {
+              "date": { "type": "string", "format": "date" },
+              "rate": { "type": "number" }
+            }
+          },
+          "gordie_howe": {
+            "type": ["object", "null"],
+            "description": "Hand-maintained status for the Gordie Howe International Bridge, shown while it is not yet open for wait times.",
+            "properties": {
+              "status": { "type": ["object", "null"] },
+              "hazmat": { "type": ["object", "null"] }
+            }
+          },
+          "crossings": { "type": "array", "items": { "$ref": "#/components/schemas/Crossing" } }
+        }
+      },
+      "HourAverage": {
+        "type": "object",
+        "properties": {
+          "hour": { "type": "integer", "minimum": 0, "maximum": 23, "description": "Local hour, America/Detroit." },
+          "wait": { "type": ["number", "null"], "description": "Average wait in minutes for that hour; null if no data." },
+          "n": { "type": "integer", "description": "Number of readings averaged." }
+        }
+      },
+      "PatternsResponse": {
+        "type": "object",
+        "properties": {
+          "generated_at": { "type": "string", "format": "date-time" },
+          "timezone": { "type": "string", "example": "America/Detroit" },
+          "lookback_days": { "type": "integer" },
+          "min_days": { "type": "integer" },
+          "history": {
+            "type": "object",
+            "properties": {
+              "days": { "type": "integer" },
+              "first": { "type": ["string", "null"], "format": "date-time" },
+              "last": { "type": ["string", "null"], "format": "date-time" }
+            }
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "False until at least min_days of history exist; when false, crossings is empty rather than a chart drawn from thin data."
+          },
+          "crossings": {
+            "type": "object",
+            "description": "Keyed by crossing slug → direction (to_canada|to_us) → vehicle (truck|car) → array of 24 HourAverage.",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/HourAverage" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

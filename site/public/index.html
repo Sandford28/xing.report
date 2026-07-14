@@ -42,7 +42,78 @@
       "name": "xing.report",
       "url": "https://xing.report/",
       "description": "Live border-crossing wait times for the Detroit–Windsor corridor: the Ambassador Bridge and the Detroit–Windsor Tunnel, trucks and cars, both directions, updated every five minutes from CBP and CBSA.",
-      "inLanguage": "en"
+      "inLanguage": "en",
+      "publisher": { "@id": "https://xing.report/#org" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://xing.report/#org",
+      "name": "xing.report",
+      "url": "https://xing.report/",
+      "description": "A free, live border-crossing utility for the Detroit–Windsor corridor. Answers one question: which bridge do I take right now?",
+      "areaServed": "Detroit–Windsor border crossing corridor (Michigan, United States and Ontario, Canada)",
+      "knowsAbout": [
+        "Ambassador Bridge wait times",
+        "Detroit–Windsor Tunnel wait times",
+        "Gordie Howe International Bridge",
+        "Blue Water Bridge (Port Huron–Sarnia)",
+        "Detroit–Windsor border crossing",
+        "Canada–United States commercial truck border wait times"
+      ]
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://xing.report/#dataset",
+      "name": "Detroit–Windsor border crossing wait times",
+      "description": "Live and historical border-crossing wait times for the Detroit–Windsor corridor — the Ambassador Bridge and the Detroit–Windsor Tunnel — for commercial (truck) and passenger (car) lanes in both directions. Readings are taken every five minutes from U.S. Customs and Border Protection (into the U.S.) and the Canada Border Services Agency (into Canada) and archived permanently. Schema also covers the Blue Water Bridge and the Gordie Howe International Bridge.",
+      "url": "https://xing.report/",
+      "sameAs": "https://xing.report/llms.txt",
+      "isAccessibleForFree": true,
+      "creator": { "@id": "https://xing.report/#org" },
+      "publisher": { "@id": "https://xing.report/#org" },
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "keywords": [
+        "border wait times",
+        "Detroit Windsor border",
+        "Ambassador Bridge wait time",
+        "Detroit-Windsor Tunnel wait time",
+        "commercial truck border crossing",
+        "Canada United States border"
+      ],
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Detroit–Windsor border crossing corridor",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 42.3117,
+          "longitude": -83.0733
+        }
+      },
+      "variableMeasured": [
+        "Border crossing wait time in minutes",
+        "Lane status (moving, slow, backed up)",
+        "Number of lanes open"
+      ],
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "name": "Current wait times, alerts and tolls (JSON)",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://xing.report/api/now"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "Typical wait by hour of day, from the archive (JSON)",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://xing.report/api/patterns"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "OpenAPI description of the public data endpoints",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://xing.report/openapi.json"
+        }
+      ]
     },
     {
       "@type": "FAQPage",
@@ -521,6 +592,14 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
 
 <main>
   <h1 class="sr-only">detroit–windsor border wait times — which bridge to take right now</h1>
+  <!-- server-rendered current numbers, filled by functions/_middleware.js before
+       the page is sent. it is a text equivalent of the live cards below, for
+       readers that don't run javascript (AI answer engines, some crawlers). it
+       is visually hidden (sr-only) so the design is unchanged, and the script
+       removes it once the live cards paint, so a screen reader never hears a
+       stale copy. if the middleware can't reach the data it stays empty and the
+       page behaves exactly as before. -->
+  <div id="ssr-live" class="sr-only"></div>
   <noscript>
     <p>live wait times for the detroit–windsor border. this page shows the current
     commercial (truck) and passenger (car) wait at the <strong>ambassador bridge</strong>
@@ -1191,6 +1270,10 @@ function bindCameras() {
 
 function render() {
   if (!data) return;
+
+  // the live cards are the source of truth now; drop the server-rendered text
+  // equivalent so a screen reader never hears a stale copy of the numbers.
+  document.getElementById('ssr-live')?.remove();
 
   document.getElementById('fastest').innerHTML = fastestBoxHtml();
 

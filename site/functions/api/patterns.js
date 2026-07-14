@@ -74,9 +74,13 @@ export async function onRequest({ env }) {
   };
 
   return Response.json(payload, {
-    // Historical aggregates move slowly; an hour of edge caching spares D1 the
-    // repeated full-window scan. This is not the live number.
-    headers: { 'cache-control': 'public, max-age=3600' },
+    headers: {
+      // Historical aggregates move slowly; an hour of edge caching spares D1 the
+      // repeated full-window scan. This is not the live number.
+      'cache-control': 'public, max-age=3600',
+      // Public, read-only data — let any site, tool, or AI agent fetch it.
+      'access-control-allow-origin': '*',
+    },
   });
 }
 

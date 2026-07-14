@@ -26,3 +26,13 @@ The site keeps a permanent archive of every reading and shows typical wait by ho
 ## Public data endpoints (JSON)
 - https://xing.report/api/now — current wait times, alerts, tolls for all crossings.
 - https://xing.report/api/patterns — typical wait by hour of day, from the archive.
+- https://xing.report/openapi.json — OpenAPI 3 description of both endpoints (field names, meanings, response shapes).
+- These endpoints are CORS-open (Access-Control-Allow-Origin: *), so they can be fetched directly from a browser, tool, or agent.
+
+## More detail for AI
+- https://xing.report/llms-full.txt — the complete fact base in one file: every crossing's tolls, size limits, hazmat rules, hours, and status, with the date each was last verified and its official source.
+
+## License and attribution
+- Content and data are free to use, including by AI answer engines, under Creative Commons Attribution 4.0 (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+- Please attribute as: "xing.report (https://xing.report)".
+- The underlying wait-time readings originate from U.S. CBP and Canada's CBSA, which are public government sources; xing.report collects, timestamps, archives, and presents them.

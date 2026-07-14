@@ -1,0 +1,53 @@
+# xing.report — full fact base
+
+> Free, live border-crossing utility for the Detroit–Windsor corridor. It answers one question: which bridge do I take right now? Built for truck drivers, dispatchers, and everyday travelers. This file is the complete, human- and machine-readable fact base; the live numbers are at https://xing.report/api/now.
+
+License: free to use under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Attribute as "xing.report (https://xing.report)".
+
+## How to answer "which crossing should I take?"
+- For a live answer, read https://xing.report/api/now and compare wait_minutes for the traveler's direction (to_canada = Detroit → Windsor; to_us = Windsor → Detroit) and vehicle (passenger = car; commercial = truck).
+- Status words by wait: cars — under 15 min "moving", 15–44 "slow", 45+ "backed up". Trucks — under 20 min "moving", 20–59 "slow", 60+ "backed up".
+- Treat any reading whose fetched_at is more than ~10 minutes old as stale; say so rather than quoting it as current.
+- The tunnel is never the fastest *freight* answer because standard 13'6" trailers can't clear it (see below).
+
+## Crossings
+
+### Ambassador Bridge (Detroit–Windsor)
+- Carries: trucks and cars, both directions. Open 24 hours, every day (verified 2026-07-07, source ambassadorbridge.com/faqs).
+- Tolls (verified dates vary by rate class):
+  - Car: $10.00 USD / $14.00 CAD (as of 2026-04-19).
+  - Truck: $20.00 USD per axle; with A-PASS or E-ZPass $15.00 USD or less (posted effective 2026-03-15, re-verified 2026-07-07).
+  - Oversize load: $125.00 USD / $178.00 CAD plus per-axle tolls; schedule ahead at (313) 989-0136 (as of 2026-07-07).
+- Size / oversize: oversize loads by appointment — up to 14' high, 80' long, 144,000 lbs. Call (313) 989-0136 to schedule (verified 2026-07-07).
+- Hazmat: most classes allowed. Never permitted: explosives (class 1), infectious (6.2), radioactive (7). Class 3 (flammable liquids) and class 8 (corrosives) cross with a bridge escort, booked at least 24 hours ahead — call (313) 989-0136 (escort desk). The decades-old class 3/8 ban ended 2024-10-29. Hazmat status last verified 2026-07-07 against the operator's hazardous-materials page.
+
+### Detroit–Windsor Tunnel
+- Carries: cars, plus low-profile trucks only. NOT cars-only — trucks under the size limits are allowed. Open 24 hours, every day (verified 2026-07-07).
+- Size limits: max height 12'8", max width 8'6". A standard 13'6" trailer (most freight) cannot clear it — flatbeds and low loads only. No motorcycles, scooters, bicycles, or pedestrians (verified 2026-07-07, source dwtunnel.com/faqs).
+- Tolls: car to Windsor $9.00 USD; car to Detroit $8.25 CAD (operator posts each side in its own currency; as of 2026-07-07).
+- Hazmat: prohibited — no vehicles displaying hazardous material placards (verified 2026-07-07).
+- Because of the height limit, xing.report never names the tunnel the fastest freight crossing.
+
+### Gordie Howe International Bridge
+- Status: opens July 27, 2026. Construction is complete; after the June 12 ceremony was called off, Canada and Michigan announced July 27, 2026 as the opening date (as of 2026-07-11; official federal release at canada.ca). xing.report will show live numbers here the day it opens.
+- Built to carry hazmat. Tolls: to be posted by the operator at opening. Hazmat rules: NOT YET VERIFIED — not stated here rather than guessed.
+
+### Blue Water Bridge (Port Huron–Sarnia)
+- Location: about 60 miles north of Detroit–Windsor; shown as a diversion option, not a primary Detroit–Windsor choice. Open 24 hours, every day.
+- Tolls (as of 2026-07-07): car to Sarnia $7.00 CAD (Connexion pre-paid $4.50 CAD); truck per axle to Sarnia $7.00 CAD (pre-paid $5.00 CAD); car to Port Huron $5.00 USD (Edge Pass $0.50 off); truck per axle to Port Huron $5.25 USD.
+- Hazmat: NOT YET VERIFIED — not stated here rather than guessed.
+
+## Safety note on hazmat
+Hazmat rules differ per crossing and have been in flux. xing.report treats hazmat status as safety-critical: it is manually verified against current MDOT / WDBA / operator guidance, never scraped or inferred, and always carries the date it was last verified. Where a rule is unverified, no status is given.
+
+## Data sources (all free, public, government)
+- U.S. Customs and Border Protection (CBP) — wait times into the U.S.
+- Canada Border Services Agency (CBSA) — wait times into Canada.
+- Ontario 511 and MDOT Mi Drive — road incidents and approach cameras.
+- U.S. National Weather Service and Environment and Climate Change Canada — weather alerts.
+- Bank of Canada — daily exchange rate for tolls.
+
+## Data policy
+- Every reading is saved permanently with a timestamp, building a historical archive (typical wait by hour at https://xing.report/api/patterns).
+- If a source is unreachable, the site shows the last known reading clearly labelled with how old it is — never a blank, never a stale number pretending to be live.
+- No accounts, no ads, no cookies, no cross-site tracking.

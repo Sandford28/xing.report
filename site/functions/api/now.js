@@ -104,8 +104,12 @@ export async function onRequest({ env }) {
   };
 
   return Response.json(payload, {
-    // Data changes every 5 minutes; never let a cache serve stale numbers.
-    headers: { 'cache-control': 'no-store' },
+    headers: {
+      // Data changes every 5 minutes; never let a cache serve stale numbers.
+      'cache-control': 'no-store',
+      // Public, read-only data — let any site, tool, or AI agent fetch it.
+      'access-control-allow-origin': '*',
+    },
   });
 }
 

@@ -3,15 +3,39 @@ User-agent: *
 Allow: /
 
 # AI answer engines are explicitly welcome to read and cite the page.
+# OpenAI (ChatGPT)
 User-agent: GPTBot
 Allow: /
 User-agent: OAI-SearchBot
 Allow: /
+User-agent: ChatGPT-User
+Allow: /
+# Anthropic (Claude)
 User-agent: ClaudeBot
 Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+# Perplexity
 User-agent: PerplexityBot
 Allow: /
+User-agent: Perplexity-User
+Allow: /
+# Google (Gemini / AI Overviews) and Apple Intelligence
 User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+# Microsoft Copilot, Amazon, Meta AI
+User-agent: Amazonbot
+Allow: /
+User-agent: Meta-ExternalAgent
+Allow: /
+# Common Crawl — the open dataset that trains and feeds many models
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://xing.report/sitemap.xml
