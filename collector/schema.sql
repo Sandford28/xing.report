@@ -103,8 +103,8 @@ CREATE TABLE IF NOT EXISTS fx_rates (
 -- site's /api/hit beacon, read by /api/stats.
 CREATE TABLE IF NOT EXISTS analytics (
   day TEXT NOT NULL,                 -- YYYY-MM-DD, America/Detroit
-  metric TEXT NOT NULL,              -- 'view' | 'ref' | 'dir' | 'veh'
-  key TEXT NOT NULL,                 -- '' for view; referrer host; 'to_us'; 'truck' ...
+  metric TEXT NOT NULL,              -- 'view' | 'hour' | 'ref' | 'dir' | 'veh'
+  key TEXT NOT NULL,                 -- '' for view; 'HH' for hour; referrer host; 'to_us'; 'truck' ...
   count INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (day, metric, key)
 );

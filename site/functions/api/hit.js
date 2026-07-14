@@ -13,6 +13,16 @@ function corridorDay(d = new Date()) {
   }).format(d);
 }
 
+// hour of day '00'..'23' in the corridor's timezone — lets the dashboard draw
+// the shape of a traffic spike (e.g. a reddit post) hour-by-hour, not just the
+// day's total. stored as its own tally so it never touches the day-level counts.
+function corridorHour(d = new Date()) {
+  const h = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Detroit', hour: '2-digit', hourCycle: 'h23',
+  }).format(d);
+  return h === '24' ? '00' : h; // some engines emit '24' at midnight
+}
+
 // only the referring site's host, never the full URL or query — and our own
 // domains collapse to "internal" so self-navigation isn't counted as traffic
 function refHost(ref) {
@@ -41,13 +51,15 @@ export async function onRequestPost({ request, env }) {
       veh = String(d.veh ?? '');
     } catch {}
 
-    const day = corridorDay();
+    const now = new Date();
+    const day = corridorDay(now);
     const bump = env.DB.prepare(
       `INSERT INTO analytics (day, metric, key, count) VALUES (?, ?, ?, 1)
        ON CONFLICT (day, metric, key) DO UPDATE SET count = count + 1`
     );
     const stmts = [
       bump.bind(day, 'view', ''),
+      bump.bind(day, 'hour', corridorHour(now)), // key is 'HH'; the day column carries the date
       bump.bind(day, 'ref', refHost(ref)),
     ];
     if (DIRS.has(dir)) stmts.push(bump.bind(day, 'dir', dir));
