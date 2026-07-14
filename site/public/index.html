@@ -147,6 +147,16 @@ main { max-width: 440px; margin: 0 auto; padding: 16px; display: flex; flex-dire
 #cards { min-height: 1120px; }
 #gordie { min-height: 60px; }
 #bluewater { min-height: 80px; }
+/* skeleton cards fill the reserved space on first paint so the load reads as
+   "loading", not a blank flash — then javascript swaps in the real cards at
+   about the same height (no jump). hard-edged and static: no shimmer or
+   gradient, to stay inside the design brief. ~600px each ≈ a real card, so the
+   swap barely moves the page. */
+.card.sk { min-height: 600px; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+.sk-bar { background: var(--muted); opacity: 0.18; }
+.sk-title { width: 55%; height: 26px; }
+.sk-hero { width: 45%; height: 88px; }
+.sk-row { width: 80%; height: 40px; }
 a { color: var(--cobalt); }
 /* readable by crawlers + screen readers, invisible on the calm glance screen */
 .sr-only {
@@ -537,7 +547,17 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
     <button id="btn-car" aria-pressed="true">car</button>
     <button id="btn-truck" aria-pressed="false">truck</button>
   </nav>
-  <div id="cards"><div class="fresh">loading…</div></div>
+  <div id="cards" aria-busy="true">
+    <span class="sr-only">loading live wait times…</span>
+    <div class="card sk" aria-hidden="true">
+      <div class="sk-bar sk-title"></div><div class="sk-bar sk-hero"></div>
+      <div class="sk-bar sk-row"></div><div class="sk-bar sk-row"></div>
+    </div>
+    <div class="card sk" aria-hidden="true">
+      <div class="sk-bar sk-title"></div><div class="sk-bar sk-hero"></div>
+      <div class="sk-bar sk-row"></div><div class="sk-bar sk-row"></div>
+    </div>
+  </div>
   <!-- rendered once, outside the 30s re-render, so an opened fold is never
        snapped shut by a refresh -->
   <div id="gordie"></div>
