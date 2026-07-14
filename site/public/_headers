@@ -21,3 +21,5 @@
   Cache-Control: public, max-age=604800
 /icon-512.png
   Cache-Control: public, max-age=604800
+/og.png
+  Cache-Control: public, max-age=604800
