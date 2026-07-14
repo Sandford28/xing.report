@@ -136,6 +136,17 @@ body {
   text-transform: lowercase; /* lowercase everywhere except emergency alert banners */
 }
 main { max-width: 440px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+/* reserve space for the blocks javascript fills in after the data loads, so the
+   page doesn't lurch downward as they appear (cumulative layout shift / CLS).
+   these are FLOORS — set safely below the real rendered height in normal use —
+   so the live content fills the space without ever leaving a visible gap.
+   #cards holds the two crossing cards (~600px each, always ≥ ~1150 together);
+   #gordie and #bluewater start empty and become a collapsed fold. #fastest and
+   #stale are intentionally left unreserved: they're conditional (a clear winner
+   / a staleness warning) and usually absent, so reserving them would gap. */
+#cards { min-height: 1120px; }
+#gordie { min-height: 60px; }
+#bluewater { min-height: 80px; }
 a { color: var(--cobalt); }
 /* readable by crawlers + screen readers, invisible on the calm glance screen */
 .sr-only {
