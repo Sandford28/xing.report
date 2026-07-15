@@ -384,6 +384,15 @@ header { background: #050505; border-bottom: 2px solid transparent; }
   padding: 4px 16px 14px;
 }
 .hero-sub .sub { font-size: 15px; color: var(--muted); }
+/* stale note — the border's own number hasn't refreshed in over an hour, so we
+   flag it on the grid rather than let a big calm numeral read as live. amber
+   fill + word ("out of date"), never color alone (§1); same skin as .alert-line. */
+.stale-note {
+  border-top: 2px solid var(--ink);
+  background: var(--slow-fill); color: var(--slow-text); font-weight: 900;
+  padding: 12px 16px; line-height: 18px;
+  font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+}
 
 /* signal field — always contains its word (§1) */
 .signal { font-size: 16px; font-weight: 900; padding: 8px 14px; letter-spacing: -0.01em; white-space: nowrap; }
@@ -809,6 +818,27 @@ function clock(iso) {
   }).format(new Date(iso)).toLowerCase();
 }
 
+// the border agency's OWN clock (feed_updated_at), told apart from our pipeline
+// clock (fetched_at, the header's "checked n min ago"). CBP publishes only once
+// an hour and can even stamp a time slightly in the future, so a reading is
+// "fresh enough" up to about an hour old; past that the agency itself hasn't
+// refreshed the number and we must say so rather than pass it off as live.
+// minsAgo() floors negatives (future stamps) to 0, so those never read as stale.
+const SOURCE_STALE_MIN = 60;
+function sourceAgeMin(r) {
+  return r && r.feed_updated_at ? minsAgo(r.feed_updated_at) : null;
+}
+function sourceStale(r) {
+  const age = sourceAgeMin(r);
+  return age !== null && age > SOURCE_STALE_MIN;
+}
+// coarse, never-understated age for the stale note: "1 hr old", "over 2 hr old"
+function agoWords(mins) {
+  if (mins < 60) return `${mins} min old`;
+  const h = Math.floor(mins / 60);
+  return mins % 60 >= 15 ? `over ${h} hr old` : `${h} hr old`;
+}
+
 function trendHtml(r) {
   if (!r || !r.trend) return '';
   return `<span class="trend t-${r.trend}">${TREND_MARK[r.trend]} ${r.trend}</span>`;
@@ -1041,8 +1071,9 @@ function comparable() {
     if (slug === 'detroit-windsor-tunnel' && mode === 'truck') continue;
     const c = data.crossings.find((x) => x.slug === slug);
     const r = c && modeLane(c);
-    // never crown a winner on a closed lane or stale data
-    if (!r || r.wait_minutes === null || minsAgo(r.fetched_at) > 10) continue;
+    // never crown a winner on a closed lane, a pipeline gap (fetched_at), or a
+    // number the border itself hasn't refreshed in over an hour (sourceStale)
+    if (!r || r.wait_minutes === null || minsAgo(r.fetched_at) > 10 || sourceStale(r)) continue;
     out.push({ slug, name: SHORT_NAME[slug] || c.name, wait: r.wait_minutes });
   }
   out.sort((a, b) => a.wait - b.wait);
@@ -1172,11 +1203,17 @@ function cardHtml(crossing, fastestSlug) {
     const reported = heroLane.feed_updated_at
       ? `reported ${clock(heroLane.feed_updated_at)}`
       : `no report time given`;
+    // the border's own number has gone stale — flag it so a big calm numeral
+    // never reads as live. the grey line still shows when it was reported.
+    const staleNote = sourceStale(heroLane)
+      ? `<div class="stale-note">this number is ${agoWords(sourceAgeMin(heroLane))} — may be out of date</div>`
+      : '';
     hero = `
       <div class="lane-label">${PICTO[heroKey]}${HERO_LANE_LABEL[heroKey] || heroKey}</div>
       <div class="hero">${heroLane.wait_minutes === null ? '–' : `${heroLane.wait_minutes}<span class="unit"> min</span>`}</div>
       ${caveat}
-      <div class="hero-sub"><span class="sub">${reported}</span>${trendHtml(heroLane)}</div>`;
+      <div class="hero-sub"><span class="sub">${reported}</span>${trendHtml(heroLane)}</div>
+      ${staleNote}`;
   }
 
   const minorKeys = heroKey === 'car' ? ['nexus', 'truck'] : ['car', 'nexus'];
