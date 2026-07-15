@@ -832,12 +832,15 @@ function sourceStale(r) {
   const age = sourceAgeMin(r);
   return age !== null && age > SOURCE_STALE_MIN;
 }
-// coarse, never-understated age for the stale note: "1 hr old", "over 2 hr old"
-function agoWords(mins) {
-  if (mins < 60) return `${mins} min old`;
+// coarse, never-understated duration for the stale note: "45 min", "over 2 hr"
+function staleFor(mins) {
+  if (mins < 60) return `${mins} min`;
   const h = Math.floor(mins / 60);
-  return mins % 60 >= 15 ? `over ${h} hr old` : `${h} hr old`;
+  return mins % 60 >= 15 ? `over ${h} hr` : `${h} hr`;
 }
+// who publishes each feed — named on the stale note so the blame lands on the
+// agency's stopped clock, not on us. falls back to "border" if source unknown.
+const FEED_AGENCY = { cbp: 'cbp', cbsa: 'cbsa' };
 
 function trendHtml(r) {
   if (!r || !r.trend) return '';
@@ -1204,9 +1207,11 @@ function cardHtml(crossing, fastestSlug) {
       ? `reported ${clock(heroLane.feed_updated_at)}`
       : `no report time given`;
     // the border's own number has gone stale — flag it so a big calm numeral
-    // never reads as live. the grey line still shows when it was reported.
+    // never reads as live, and name the agency so it's plainly their feed that
+    // stopped, not us. the grey line still shows when it was reported.
+    const agency = FEED_AGENCY[heroLane.source] || 'border';
     const staleNote = sourceStale(heroLane)
-      ? `<div class="stale-note">this number is ${agoWords(sourceAgeMin(heroLane))} — may be out of date</div>`
+      ? `<div class="stale-note">official ${agency} data hasn't updated in ${staleFor(sourceAgeMin(heroLane))}</div>`
       : '';
     hero = `
       <div class="lane-label">${PICTO[heroKey]}${HERO_LANE_LABEL[heroKey] || heroKey}</div>
