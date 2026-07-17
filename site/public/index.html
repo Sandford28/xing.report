@@ -441,6 +441,18 @@ header { background: #050505; border-bottom: 2px solid transparent; }
   border-top: 2px solid var(--ink);
   color: var(--muted); padding: 12px 16px; font-size: 13px; letter-spacing: 0.08em;
 }
+/* more than one alert on a card: the strip becomes a tap-to-open list so
+   "+n more" is never a dead-end count. summary keeps its signal fill; the
+   +/− marker inherits the strip's text color (ink on amber, paper on red). */
+details.alert-more > summary {
+  min-height: 56px; cursor: pointer; list-style: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+details.alert-more > summary::-webkit-details-marker { display: none; }
+details.alert-more > summary::after {
+  content: '+'; flex: none; font-size: 22px; font-weight: 400; line-height: 1;
+}
+details.alert-more[open] > summary::after { content: '−'; }
 
 /* reference facts / chart / camera fold away behind one glove-sized tap (§3) */
 .more { border-top: 2px solid var(--ink); }
@@ -943,9 +955,17 @@ function alertRowHtml(crossing) {
   }
   const alerts = crossing.alerts || [];
   if (!alerts.length) return `<div class="alert-none">no incidents</div>`;
-  const more = alerts.length > 1 ? ` +${alerts.length - 1} more` : '';
-  const cls = alerts[0].is_full_closure ? 'alert-line alert-closure' : 'alert-line';
-  return `<div class="${cls}">${alertLineText(alerts[0], crossing.slug)}${more}</div>`;
+  const cls = (a) => a.is_full_closure ? 'alert-line alert-closure' : 'alert-line';
+  const line = (a) => `<div class="${cls(a)}">${alertLineText(a, crossing.slug)}</div>`;
+  // one alert: the plain strip. more than one: the strip becomes the summary of
+  // a tap-to-open list, so "+n more" always leads to what the others actually
+  // are (each on its own signal fill) — never a dead-end count.
+  if (alerts.length === 1) return line(alerts[0]);
+  const rest = alerts.slice(1).map(line).join('');
+  return `<details class="alert-more" data-slug="${crossing.slug}-alerts">
+    <summary class="${cls(alerts[0])}">${alertLineText(alerts[0], crossing.slug)} +${alerts.length - 1} more</summary>
+    ${rest}
+  </details>`;
 }
 
 function money(n) {
