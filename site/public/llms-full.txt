@@ -29,8 +29,12 @@ License: free to use under CC BY 4.0 (https://creativecommons.org/licenses/by/4.
 - Because of the height limit, xing.report never names the tunnel the fastest freight crossing.
 
 ### Gordie Howe International Bridge
-- Status: opens July 27, 2026. Construction is complete; after the June 12 ceremony was called off, Canada and Michigan announced July 27, 2026 as the opening date (as of 2026-07-11; official federal release at canada.ca). xing.report will show live numbers here the day it opens.
-- Built to carry hazmat. Tolls: to be posted by the operator at opening. Hazmat rules: NOT YET VERIFIED — not stated here rather than guessed.
+- Carries: trucks and cars, both directions. Opened to traffic July 27, 2026. Open 24 hours, every day.
+- Tolls (as of 2026-07-27, operator posts every rate in both currencies): car $5.75 USD / $8.00 CAD (Breakaway account $4.35 USD / $6.00 CAD); truck per axle $8.60 USD / $12.00 CAD (Breakaway $6.90 USD / $9.60 CAD); hazmat or oversize per axle $8.75 USD / $12.00 CAD plus possible special-handling fees.
+- Size / oversize: up to 17'3" high, 11'8" wide, 99' long, 153,000 lbs. Permit required from Ontario MTO or Michigan MDOT. No oversize travel 7–9 am or 3–6 pm. Call the Traffic Management Centre at 1-800-204-3616 at least 24 hours ahead (verified 2026-07-27).
+- Hazmat: all nine classes allowed, with no permit and no advance notification required. Oversize hazmat still needs an MTO/MDOT permit. Last verified 2026-07-27 against the operator's specialized-loads page. This is the operational difference from the Ambassador Bridge, which bans classes 1, 6.2 and 7 outright and escorts classes 3 and 8.
+- The multi-use path for pedestrians and cyclists is toll-free and opens August 5, 2026.
+- Approach cameras are the nearest live MDOT and Ontario 511 feeds; the operator's own cameras are not published yet.
 
 ### Blue Water Bridge (Port Huron–Sarnia)
 - Location: about 60 miles north of Detroit–Windsor; shown as a diversion option, not a primary Detroit–Windsor choice. Open 24 hours, every day.

@@ -149,14 +149,6 @@
               "rate": { "type": "number" }
             }
           },
-          "gordie_howe": {
-            "type": ["object", "null"],
-            "description": "Hand-maintained status for the Gordie Howe International Bridge, shown while it is not yet open for wait times.",
-            "properties": {
-              "status": { "type": ["object", "null"] },
-              "hazmat": { "type": ["object", "null"] }
-            }
-          },
           "crossings": { "type": "array", "items": { "$ref": "#/components/schemas/Crossing" } }
         }
       },

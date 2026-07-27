@@ -13,7 +13,8 @@
 //   to_canada  (heading into Canada) → the U.S.-side approach  (MDOT Mi Drive)
 //   to_us      (heading into the U.S.) → the Canadian-side approach (Ontario 511)
 //
-// IMAGE URLS, verified 2026-07-07 (each returned image/jpeg, http 200):
+// IMAGE URLS, verified 2026-07-07 (gordie howe's pair 2026-07-27) — each
+// returned a live image/jpeg frame, http 200:
 //   • Ontario 511: the camera view URL IS the live JPEG
 //     (https://511on.ca/map/Cctv/{viewId}; ~20s refresh, CORS open).
 //   • MDOT Mi Drive: the still is the camera's `link`, discovered once via
@@ -54,6 +55,23 @@ export const CAMERAS = {
     to_us: {
       image: 'https://511on.ca/map/Cctv/1511',
       where: 'tunnel plaza · windsor',
+      ...ON511,
+    },
+  },
+  // opening day (2026-07-27): wdba's own camera page is still "coming soon",
+  // so both sides fall back to the nearest live agency cam on the approach.
+  // swap in wdba's feeds when they publish. the mdot cam right at the plaza
+  // (cam_265, i-75 @ dearborn st) serves the "stream not available"
+  // placeholder, so we use the next live one up the i-75 approach.
+  'gordie-howe-bridge': {
+    to_canada: {
+      image: 'https://micamerasimages.net/thumbs/semtoc_cam_097.flv.jpg?item=1',
+      where: 'i-75 north at junction · detroit',
+      ...MDOT,
+    },
+    to_us: {
+      image: 'https://511on.ca/map/Cctv/875',
+      where: 'hwy 401 at ojibway parkway · windsor',
       ...ON511,
     },
   },

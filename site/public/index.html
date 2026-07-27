@@ -173,7 +173,7 @@
 </script>
 <style>
 /* ============ design system v2 — high-vis industrial (DESIGN-SPEC §1) ============
-   freight-first, blueprint-when-calm: when a lane is moving nothing fills, just
+   blueprint-when-calm: when a lane is moving nothing fills, just
    stark ink on paper. amber and red blocks appear only when a lane slows or backs
    up. 4px ink grid, 112px/900 hero numeral, one acid-volt highlight on "fastest". */
 :root {
@@ -218,12 +218,11 @@ main { max-width: 440px; margin: 0 auto; padding: 16px; display: flex; flex-dire
    page doesn't lurch downward as they appear (cumulative layout shift / CLS).
    these are FLOORS — set safely below the real rendered height in normal use —
    so the live content fills the space without ever leaving a visible gap.
-   #cards holds the two crossing cards (~600px each, always ≥ ~1150 together);
-   #gordie and #bluewater start empty and become a collapsed fold. #fastest and
+   #cards holds the three crossing cards (~600px each, always ≥ ~1730 together);
+   #bluewater starts empty and becomes a collapsed fold. #fastest and
    #stale are intentionally left unreserved: they're conditional (a clear winner
    / a staleness warning) and usually absent, so reserving them would gap. */
-#cards { min-height: 1120px; }
-#gordie { min-height: 60px; }
+#cards { min-height: 1680px; }
 #bluewater { min-height: 80px; }
 /* skeleton cards fill the reserved space on first paint so the load reads as
    "loading", not a blank flash — then javascript swaps in the real cards at
@@ -465,7 +464,7 @@ details.alert-more[open] > summary::after { content: '−'; }
 .more summary::after { content: '+'; font-size: 24px; font-weight: 400; color: var(--muted); }
 .more[open] summary::after { content: '−'; }
 
-/* a whole crossing folded to one row — blue water + gordie howe */
+/* a whole crossing folded to one row — blue water */
 details.fold { border: 4px solid var(--ink); }
 .fold > summary {
   min-height: 60px; padding: 16px;
@@ -526,9 +525,6 @@ details.fold { border: 4px solid var(--ink); }
 }
 .rule { border: none; border-top: 2px solid var(--ink); margin: 16px 0; }
 
-/* gordie howe status */
-.status-headline { font-size: 24px; line-height: 28px; font-weight: 900; margin: 0 0 8px; }
-.status-note { margin-bottom: 8px; }
 .as-of { font-size: 13px; line-height: 16px; color: var(--muted); }
 
 /* ============ sources — provenance is the product's authority ============ */
@@ -630,12 +626,14 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
   <div id="ssr-live" class="sr-only"></div>
   <noscript>
     <p>live wait times for the detroit–windsor border. this page shows the current
-    commercial (truck) and passenger (car) wait at the <strong>ambassador bridge</strong>
-    and the <strong>detroit–windsor tunnel</strong>, in both directions, updated every
-    five minutes from u.s. customs and border protection (cbp) and the canada border
-    services agency (cbsa). the <strong>blue water bridge</strong> at port huron is
-    included as a diversion option; the <strong>gordie howe international bridge</strong>
-    is not open yet. please enable javascript to see the live numbers.</p>
+    commercial (truck) and passenger (car) wait at the
+    <strong>detroit–windsor tunnel</strong>, the
+    <strong>gordie howe international bridge</strong> and the
+    <strong>ambassador bridge</strong>, in both directions, updated every five
+    minutes from u.s. customs and border protection (cbp) and the canada border
+    services agency (cbsa). the <strong>blue water bridge</strong> at port huron
+    is included as a diversion option. please enable javascript to see the live
+    numbers.</p>
   </noscript>
   <div id="fastest"></div>
   <nav class="toggle" aria-label="direction">
@@ -664,12 +662,13 @@ footer { max-width: 440px; margin: 0 auto; padding: 16px 16px 24px; }
       <div class="sk-bar sk-title"></div><div class="sk-bar sk-hero"></div>
       <div class="sk-bar sk-row"></div><div class="sk-bar sk-row"></div>
     </div>
+    <div class="card sk" aria-hidden="true">
+      <div class="sk-bar sk-title"></div><div class="sk-bar sk-hero"></div>
+      <div class="sk-bar sk-row"></div><div class="sk-bar sk-row"></div>
+    </div>
   </div>
-  <!-- rendered once, outside the 30s re-render, so an opened fold is never
-       snapped shut by a refresh -->
-  <div id="gordie"></div>
-  <!-- blue water sits below gordie howe — a real diversion 60 mi north, but the
-       last option a detroit–windsor driver reaches for -->
+  <!-- blue water sits below the three detroit–windsor crossings — a real
+       diversion 60 mi north, but the last option a driver reaches for -->
   <div id="bluewater"></div>
 </main>
 
@@ -740,12 +739,19 @@ const TREND_MARK = { climbing: '▲', easing: '▼', steady: '—' };
 
 // lane names in plain language — "nexus" means nothing to a first-timer
 const LANE_LABEL = { truck: 'truck', car: 'car', nexus: 'nexus (trusted traveler)' };
-// the lane label under the hero reads as a wait, freight-first
+// the lane label under the hero reads as a wait ("car wait" / "truck wait")
 const HERO_LANE_LABEL = { truck: 'truck wait', car: 'car wait' };
 
-// the two crossings a detroit–windsor driver actually chooses between
-const COMPARE_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
-const SHORT_NAME = { 'ambassador-bridge': 'ambassador', 'detroit-windsor-tunnel': 'tunnel' };
+// the crossings a detroit–windsor driver actually chooses between, in the
+// order mark wants them read (tunnel, gordie howe, ambassador). note this is
+// the FALLBACK order only: once live numbers land the cards re-sort
+// fastest-first, and this order decides ties and crossings with no reading.
+const COMPARE_POOL = ['detroit-windsor-tunnel', 'gordie-howe-bridge', 'ambassador-bridge'];
+const SHORT_NAME = {
+  'detroit-windsor-tunnel': 'tunnel',
+  'gordie-howe-bridge': 'gordie howe',
+  'ambassador-bridge': 'ambassador',
+};
 // google maps location by crossing — well-known landmark names (not guessed
 // coordinates), so google resolves each to the right place and a driver's app
 // routes from wherever they are. opens the location pin, not turn-by-turn.
@@ -877,6 +883,7 @@ function minorLaneHtml(r, picto, label) {
 
 // which town each side's alerts speak for, per crossing
 const SIDE_LABELS = {
+  'gordie-howe-bridge': { ca: 'windsor', us: 'detroit' },
   'ambassador-bridge': { ca: 'windsor', us: 'detroit' },
   'detroit-windsor-tunnel': { ca: 'windsor', us: 'detroit' },
   'blue-water-bridge': { ca: 'sarnia', us: 'port huron' },
@@ -1199,13 +1206,36 @@ function cameraHtml(crossing) {
 
 /* ============ crossing card — the comparison + the detail, in one ============ */
 
+// the same card, minus a number we don't have. no signal chip and no trend
+// word, because inventing either would be the lie the whole site exists to
+// avoid — the dash and the sentence carry the meaning instead.
+function noReadingCardHtml(crossing) {
+  const mb = mapsLink(crossing.slug);
+  return `<section class="card">
+    <div class="card-head">
+      <h2 class="card-name">${crossing.name}</h2>
+    </div>
+    ${mb ? `<div class="card-actions">${mb}</div>` : ''}
+    <div class="lane-label">${PICTO[mode] || ''}${HERO_LANE_LABEL[mode] || mode}</div>
+    <div class="hero">–</div>
+    <div class="hero-sub"><span class="sub">no wait time reported yet for this crossing</span></div>
+    ${alertRowHtml(crossing)}
+    ${cameraHtml(crossing)}
+    ${factsHtml(crossing.info, crossing.slug)}
+  </section>`;
+}
+
 function cardHtml(crossing, fastestSlug) {
   const lanes = {
     truck: lane(crossing.readings, 'commercial', 'standard'),
     car: lane(crossing.readings, 'passenger', 'standard'),
     nexus: lane(crossing.readings, 'passenger', 'nexus'),
   };
-  if (!lanes.truck && !lanes.car) return '';
+  // a crossing we're actively tracking must never silently disappear (trust
+  // rule: never a blank). when no lane has landed yet — a newly opened
+  // crossing, or a feed that's gone quiet — show the card with the facts we
+  // DO know (tolls, hours, hazmat) and say plainly that there's no number.
+  if (!lanes.truck && !lanes.car) return noReadingCardHtml(crossing);
 
   // the chosen vehicle leads every card — the eye finds the same thing in
   // the same place on each one
@@ -1290,27 +1320,6 @@ function blueWaterFoldHtml() {
   </details>`;
 }
 
-// gordie howe: until it opens, one calm status row — no wait time yet
-function gordieFoldHtml(g) {
-  if (!g || !g.status) return '';
-  return `<details class="fold">
-    <summary>
-      <span class="fold-title">
-        <span class="fold-name">gordie howe bridge</span>
-        <span class="fold-info">${g.status.headline}</span>
-      </span>
-    </summary>
-    <div class="fold-body">
-      <div class="status-headline">${g.status.headline}</div>
-      <div class="status-note">${g.status.note}</div>
-      <div class="as-of">as of ${shortDate(g.status.as_of)}${g.status.source ? ` · ${srcLink(g.status.source)}` : ''}</div>
-      <div style="margin-top:8px">${mapsLink('gordie-howe-bridge')}</div>
-      <hr class="rule">
-      <div class="facts" style="padding:0">${hazmatLine(g.hazmat)}</div>
-    </div>
-  </details>`;
-}
-
 // each camera loads its image only when its fold is open (deferred fetch),
 // and shows a calm line instead of a broken-image icon if it's down. re-bound
 // each render because the cards are rebuilt from scratch.
@@ -1349,7 +1358,7 @@ function render() {
   const cardsEl = document.getElementById('cards');
   const bwEl = document.getElementById('bluewater');
   // re-rendering must not snap an open panel shut while it's being read — track
-  // both blocks (blue water renders separately so gordie can sit above it)
+  // both blocks (blue water renders separately, below the three main cards)
   const openMore = new Set(
     [...cardsEl.querySelectorAll('details[open]'), ...bwEl.querySelectorAll('details[open]')]
       .map((d) => d.dataset.slug)
@@ -1395,12 +1404,6 @@ function render() {
   }
   for (const m of ['truck', 'car']) {
     document.getElementById('btn-' + m).setAttribute('aria-pressed', String(m === mode));
-  }
-
-  // once only — see the comment on #gordie
-  const gordie = document.getElementById('gordie');
-  if (!gordie.innerHTML && data.gordie_howe) {
-    gordie.innerHTML = gordieFoldHtml(data.gordie_howe);
   }
 }
 

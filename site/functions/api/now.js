@@ -77,15 +77,10 @@ export async function onRequest({ env }) {
     "SELECT date, rate FROM fx_rates WHERE pair = 'USDCAD' ORDER BY date DESC LIMIT 1"
   ).first();
 
-  // The Gordie Howe status section is hand-maintained and shown even while
-  // the crossing is inactive for wait times.
-  const gordie = CROSSING_INFO['gordie-howe-bridge'];
-
   const payload = {
     generated_at: nowIso,
     alerts_checked_at: alertsChecked?.t ?? null,
     usd_cad: fx ? { date: fx.date, rate: fx.rate } : null,
-    gordie_howe: gordie ? { status: gordie.status, hazmat: gordie.hazmat } : null,
     crossings: crossings.map((c) => ({
       slug: c.slug,
       name: c.name,

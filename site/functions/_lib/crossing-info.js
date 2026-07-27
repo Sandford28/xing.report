@@ -1,4 +1,4 @@
-// Hand-maintained facts: tolls, hazmat, Gordie Howe status.
+// Hand-maintained facts: tolls, hours, size limits, hazmat.
 // This file is edited by a human, verified against the operator/agency
 // listed in `source`, and never scraped. Every block carries the date it
 // was last checked (as_of / last_verified) — the page always shows it.
@@ -74,19 +74,60 @@ export const CROSSING_INFO = {
       source: 'https://www.ambassadorbridge.com/hazardous-materials/',
     },
   },
+  // opened to traffic 2026-07-27. the operator (wdba) posts every rate in both
+  // currencies, so no row here is a calculated estimate.
   'gordie-howe-bridge': {
-    status: {
-      headline: 'opens july 27, 2026',
-      note: 'construction is complete. after the june 12 ceremony was called off, canada and michigan announced july 27, 2026 as the opening date. we’ll show it here the day it opens.',
-      as_of: '2026-07-11',
-      // official federal release (housing, infrastructure and communities canada)
-      source: 'https://www.canada.ca/en/housing-infrastructure-communities/news/2026/07/the-gordie-howe-international-bridge-will-open-on-july-27th-strengthening-trade-connectivity-and-economic-development.html',
+    tolls: {
+      rows: [
+        {
+          veh: 'car', label: 'car', usd: 5.75, cad: 8.0,
+          note: 'breakaway account: $4.35 usd / $6.00 cad',
+          as_of: '2026-07-27',
+          source: 'https://gordiehoweinternationalbridge.com/toll/toll-rates/',
+        },
+        {
+          veh: 'truck', label: 'truck, per axle', usd: 8.6, cad: 12.0,
+          note: 'breakaway account: $6.90 usd / $9.60 cad',
+          as_of: '2026-07-27',
+          source: 'https://gordiehoweinternationalbridge.com/toll/toll-rates/',
+        },
+        {
+          veh: 'truck', label: 'hazmat or oversize, per axle', usd: 8.75, cad: 12.0,
+          note: 'special-handling fees may be added',
+          as_of: '2026-07-27',
+          source: 'https://gordiehoweinternationalbridge.com/toll/toll-rates/',
+        },
+      ],
     },
-    tolls: null,             // to be posted by the operator at opening
+    hours: {
+      text: 'open 24 hours, every day',
+      as_of: '2026-07-27',
+      source: 'https://bwt.cbp.gov/', // cbp lists the port's hours as "24 hrs/day"
+    },
+    limits: {
+      text: 'oversize loads by permit',
+      detail: [
+        'up to 17\'3" high · 11\'8" wide · 99\' long · 153,000 lbs',
+        'no oversize travel 7–9 am or 3–6 pm',
+        'permit from mto (ontario) or mdot (michigan)',
+      ],
+      phone: '+18002043616',
+      phone_label: 'call 1-800-204-3616 — 24 hr notice required',
+      as_of: '2026-07-27',
+      source: 'https://gordiehoweinternationalbridge.com/toll/specialized-loads/',
+    },
+    // verified against wdba's own specialized-loads page on opening day: the
+    // bridge takes all nine classes with no permit and no advance notification.
+    // this is the operational difference from the ambassador, which bans
+    // classes 1, 6.2 and 7 outright and escorts 3 and 8.
     hazmat: {
-      status: null,          // NOT VERIFIED — do not guess (see header note)
-      last_verified: null,
-      source: 'https://gordiehoweinternationalbridge.com',
+      status: 'all nine classes allowed',
+      detail: [
+        'no permit and no advance notice required',
+        'oversize hazmat still needs an mto/mdot permit',
+      ],
+      last_verified: '2026-07-27',
+      source: 'https://gordiehoweinternationalbridge.com/toll/specialized-loads/',
     },
   },
   'detroit-windsor-tunnel': {

@@ -12,7 +12,7 @@
 // real visitor never sees or hears a duplicate.
 
 const HTML_PATH = '/';
-const COMPARE_POOL = ['ambassador-bridge', 'detroit-windsor-tunnel'];
+const COMPARE_POOL = ['detroit-windsor-tunnel', 'gordie-howe-bridge', 'ambassador-bridge'];
 const TZ = 'America/Detroit';
 
 export async function onRequest(context) {
@@ -156,6 +156,7 @@ function statusWord(wait, vehicle) {
 }
 
 function shortName(x) {
+  if (x.slug === 'gordie-howe-bridge') return 'Gordie Howe International Bridge';
   if (x.slug === 'ambassador-bridge') return 'Ambassador Bridge';
   if (x.slug === 'detroit-windsor-tunnel') return 'Detroit–Windsor Tunnel';
   return x.name || x.slug;
