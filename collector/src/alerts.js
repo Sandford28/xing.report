@@ -30,6 +30,14 @@ async function collectAlerts(env) {
     .prepare('SELECT * FROM crossings WHERE active = 1')
     .all();
 
+  // THE ARCHIVE COMES FIRST. This used to run last, after all the feed work —
+  // and on 2026-07-27 that ordering cost us live data: activating a fourth
+  // crossing pushed this worker past its CPU limit, the run was killed partway,
+  // and the backstop below never executed. Wait readings can never be
+  // backfilled; alerts can be re-fetched five minutes later. So if the budget
+  // runs out, it must run out on the alerts, not on the archive.
+  await backstopWaits(env);
+
   const alertFeeds = [
     ...on511.FEEDS,
     ...mdot.FEEDS,
@@ -41,8 +49,6 @@ async function collectAlerts(env) {
   await Promise.allSettled(
     alertFeeds.map((feed) => collectAlertFeed(env, feed, crossings, fetchedAt))
   );
-
-  await backstopWaits(env);
 }
 
 // Self-healing backstop for the wait archive. Worker A owns it, but its 5-minute

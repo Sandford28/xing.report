@@ -22,6 +22,15 @@ export const CORRIDORS = {
     us_point: { lat: 42.3314, lon: -83.0458 }, // detroit (shared with ambassador)
     on511_region: 'windsor',
   },
+  'gordie-howe-bridge': {
+    // Ojibway Pkwy + the west end of Hwy 401 down to the plaza
+    ca_box: { latMin: 42.22, latMax: 42.3, lonMin: -83.14, lonMax: -83.02 },
+    // I-75 through southwest Detroit down to the Springwells plaza
+    us_box: { latMin: 42.25, latMax: 42.34, lonMin: -83.2, lonMax: -83.05 },
+    ca_point: { lat: 42.293, lon: -83.051 },   // windsor (shared with ambassador)
+    us_point: { lat: 42.3314, lon: -83.0458 }, // detroit (shared with ambassador)
+    on511_region: 'windsor',
+  },
   'blue-water-bridge': {
     // Hwy 402 through Point Edward / Sarnia
     ca_box: { latMin: 42.93, latMax: 43.02, lonMin: -82.47, lonMax: -82.3 },
@@ -43,12 +52,39 @@ export function inBox(box, lat, lon) {
 
 // crossings: rows from the crossings table. Returns ids whose box on the
 // given side contains the point.
-export function matchCrossings(crossings, side, lat, lon) {
-  return crossings
-    .filter((c) => {
+//
+// This is the hottest loop in the alerts worker: it runs once per Ontario 511
+// event and once per MDOT incident — thousands of calls per run — and the
+// worker lives inside a hard CPU limit it has already blown once (2026-07-27,
+// when a fourth crossing was activated). So the per-crossing slug lookup and
+// the corridor-less rows are resolved ONCE per crossings array and cached,
+// leaving only the box arithmetic in the loop. The cache is a WeakMap keyed on
+// the array itself, so a fresh array each run means a fresh cache and no
+// staleness after a crossing is activated.
+const boxCache = new WeakMap();
+
+function boxesFor(crossings) {
+  let cached = boxCache.get(crossings);
+  if (!cached) {
+    cached = { ca: [], us: [] };
+    for (const c of crossings) {
       const corridor = CORRIDORS[c.slug];
-      if (!corridor) return false;
-      return inBox(side === 'ca' ? corridor.ca_box : corridor.us_box, lat, lon);
-    })
-    .map((c) => c.id);
+      if (!corridor) continue; // no corridor defined — nothing to match against
+      cached.ca.push({ id: c.id, box: corridor.ca_box });
+      cached.us.push({ id: c.id, box: corridor.us_box });
+    }
+    boxCache.set(crossings, cached);
+  }
+  return cached;
+}
+
+export function matchCrossings(crossings, side, lat, lon) {
+  if (typeof lat !== 'number' || typeof lon !== 'number') return [];
+  const ids = [];
+  for (const { id, box } of boxesFor(crossings)[side === 'ca' ? 'ca' : 'us']) {
+    if (lat >= box.latMin && lat <= box.latMax && lon >= box.lonMin && lon <= box.lonMax) {
+      ids.push(id);
+    }
+  }
+  return ids;
 }
