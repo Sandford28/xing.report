@@ -4,9 +4,11 @@ This file is the standing brief for building xing.report. Read it before making 
 
 ## What we're building
 
-A free, live border-crossing utility for the Detroit–Windsor corridor. It answers one question: **which bridge do I take right now?** The user is often a truck driver or dispatcher glancing at a phone in a cab, in sunlight, in a hurry. Every decision serves that person.
+A free, live border-crossing utility for the Detroit–Windsor corridor. It answers one question: **which bridge do I take right now?** The user is glancing at a phone behind the wheel, in sunlight, in a hurry. Every decision serves that person.
 
-Two bridges are compared: the **Gordie Howe International Bridge** and the **Ambassador Bridge**, in both directions (Detroit → Windsor and Windsor → Detroit).
+**Cars come first** (my call, 2026-07-27). The page opens on the car view and the crossings are ordered for a driver, not a dispatcher. Freight is still fully served — truck lanes, per-axle tolls, size limits and hazmat rules are all there behind the truck toggle, and the tunnel is never named the fastest freight crossing because a standard 13'6" trailer can't clear it. But when the two audiences pull in different directions, cars win.
+
+Three crossings are compared: the **Detroit–Windsor Tunnel**, the **Gordie Howe International Bridge** and the **Ambassador Bridge**, in both directions (Detroit → Windsor and Windsor → Detroit). The **Blue Water Bridge** at Port Huron sits below them as a diversion option.
 
 ## Priorities, in order
 
@@ -19,8 +21,8 @@ Two bridges are compared: the **Gordie Howe International Bridge** and the **Amb
 
 Build only the current phase. Do not build ahead.
 
-- **Phase 0 (now):** Live Ambassador Bridge wait times + approach-road alerts + tolls, plus a "Gordie Howe status" section (is it open yet?). **The data archive must be recording from the very first deploy** — see below.
-- **Phase 1 (bridge opens):** Turn on the full two-bridge comparison.
+- **Phase 0 (done):** Live Ambassador Bridge wait times + approach-road alerts + tolls, plus a "Gordie Howe status" section (is it open yet?). **The data archive must be recording from the very first deploy** — see below.
+- **Phase 1 (now — the bridge opened 2026-07-27):** The full comparison is on. The Gordie Howe status fold is retired; it's a normal crossing card like the others.
 - **Phase 2 (later):** A directory of customs brokers, carriers, warehouses.
 - **Phase 3 (only if traffic justifies):** A freight-matching board.
 
@@ -54,7 +56,7 @@ The site shows *current* wait times. But every reading the site fetches must als
 - Tolls, hours, lane info: entered by hand, updated when they change.
 
 ### Hazmat routing — hand-maintained, never scraped
-"Can I take this load across?" has a different answer per crossing and the rules have been in flux: the Ambassador banned Class 3/8 hazmat for decades, the truck ferry that carried it ceased operating in 2023, a permit to allow hazmat on the Ambassador has been under MDOT review, and the Gordie Howe is built to carry hazmat. Each crossing therefore carries a hazmat status field that is **manually verified against current MDOT/WDBA/operator guidance before every change** — this is safety-relevant information, so it is never inferred, never scraped, and always shows the date it was last verified.
+"Can I take this load across?" has a different answer per crossing and the rules have been in flux: the Ambassador banned Class 3/8 hazmat for decades, the truck ferry that carried it ceased operating in 2023, a permit to allow hazmat on the Ambassador has been under MDOT review, and the Gordie Howe takes all nine classes with no permit and no advance notification (verified against WDBA on opening day, 2026-07-27 — this is now the corridor's hazmat answer). Each crossing therefore carries a hazmat status field that is **manually verified against current MDOT/WDBA/operator guidance before every change** — this is safety-relevant information, so it is never inferred, never scraped, and always shows the date it was last verified.
 
 If any source is unreachable, the site shows the last known reading clearly labelled with how old it is — never a blank, never a stale number pretending to be live.
 
